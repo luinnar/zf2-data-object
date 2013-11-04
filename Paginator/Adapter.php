@@ -1,6 +1,6 @@
 <?php
 
-namespace DataObject;
+namespace DataObject\Paginator;
 
 use Zend\Db\Sql\Sql;
 use Zend\Db\Sql\Select;
@@ -13,7 +13,7 @@ use Zend\Paginator\Adapter\AdapterInterface;
  * @license		New BSD License
  * @author		Mateusz Juściński, Mateusz Kohut, Daniel Kózka
  */
-class Paginator implements AdapterInterface
+class Adapter implements AdapterInterface
 {
 	/**
 	 * Array defines order

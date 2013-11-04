@@ -93,23 +93,28 @@ abstract class Factory
 	 *
 	 * @param	array	$aIds		array with ID/IDs
 	 * @param	array	$aOrder		array with order definition
+	 * @param	mixed	$mOption	additional options for getSelect
 	 * @return	array
 	 */
-	public function getFromIds(array $aIds, array $aOrder = array())
+	public function getFromIds(array $aIds, array $aOrder = array(), $mOption = null)
 	{
 		if(empty($aIds))
 		{
 			return array();
 		}
 
-		$oSelect = $this->getSelect()->where($this->getPrimaryWhere($aIds));
+		$oSelect = $this->getSelect(array('*'), $mOption)
+						->where($this->getPrimaryWhere($aIds));
 
 		if(!empty($aOrder))
 		{
 			$oSelect->order($aOrder);
 		}
 
-		return $this->createList($oSelect->getSqlString(self::$oDb->getPlatform()));
+		return $this->createList(
+					$oSelect->getSqlString(self::$oDb->getPlatform()),
+					$mOption
+				);
 	}
 
 	/**
@@ -117,31 +122,33 @@ abstract class Factory
 	 *
 	 * @param	Zend/Db/Sql/Where	$mWhere		where object
 	 * @param	array				$aOrder		array with ordering options
-	 * @param	array				$aOption	additional options
+	 * @param	mixed				$mOption	additional options
 	 */
-	public function getFromWhere(Where $oWhere, array $aOrder = array(), array $aOption = array())
+	public function getFromWhere(Where $oWhere, array $aOrder = array(), $mOption = null)
 	{
-		$oSelect = $this->getSelect(array(), $aOption)->where($oWhere);
+		$oSelect = $this->getSelect(array('*'), $mOption)->where($oWhere);
 
 		if(!empty($aOrder))
 		{
 			$oSelect->order($aOrder);
 		}
 
-		return $this->createList($oSelect);
+		return $this->createList($oSelect, $mOption);
 	}
 
 	/**
 	 * Returns a single object with the specified ID
 	 *
-	 * @param	mixed	$mId	specific key value or an array (<field> => <value>)
+	 * @param	mixed	$mId		specific key value or an array (<field> => <value>)
+	 * @param	mixed	$mOption	optional parameters
 	 * @return	Core_DataObject
 	 */
-	public function getOne($mId)
+	public function getOne($mId, $mOption = null)
 	{
-		$aResult = $this->createList(
-						$this->getSelect()->where($this->getPrimaryWhere($mId))
-					);
+		$oSelect = $this->getSelect(array('*'), $mOption)
+						->where($this->getPrimaryWhere($mId));
+
+		$aResult = $this->createList($oSelect, $mOption);
 
 		if(!isset($aResult[0]))
 		{
@@ -193,7 +200,7 @@ abstract class Factory
 	 * @param	array							$aOrder		array with order definition
 	 * @param	string|Core_DataObject_Wheret	$oWhere		where string or Where object
 	 * @param	mixed							$mOption	optional parameters sended to getPage()
-	 * @return	array
+	 * @return	\Zend\Paginator\Paginator
 	 */
 	public function getPaginator($iPage, $iCount, array $aOrder = array(), Where $oWhere = null,
 									$mOption = null)
@@ -205,7 +212,7 @@ abstract class Factory
 			$oSelect->where($oWhere);
 		}
 
-		$oInterface = new Paginator($this, $oSelect, $mOption);
+		$oInterface = new Paginator\Adapter($this, $oSelect, $mOption);
 
 		if(!empty($aOrder))
 		{
@@ -251,9 +258,10 @@ abstract class Factory
 	 * Create object from DB row
 	 *
 	 * @param	array	$aRow	one row from database
-	 * @return	Core_DataObject
+	 * @param	mixed	$mOption	optional parameters
+	 * @return	DataObject
 	 */
-	abstract protected function createObject(array $aRow);
+	abstract protected function createObject(array $aRow, $mOption = null);
 
 	/**
 	 * Returns DB table name

@@ -148,8 +148,7 @@ abstract class DataObject
 				$oDb::QUERY_MODE_EXECUTE
 			);
 
-			$this->aModifiedFields = array();
-			$this->bModified = false;
+			$this->clearModified();
 		}
 	}
 
@@ -169,6 +168,17 @@ abstract class DataObject
 		$this->oDb				= Factory::getConnection();
 		$this->sTableName		= $sTableName;
 		$this->aPrimaryValue	= $aPrimaryKey;
+	}
+
+	/**
+	 * Clears information about data modifications
+	 *
+	 * @return	void
+	 */
+	final protected function clearModified()
+	{
+		$this->aModifiedFields = array();
+		$this->bModified = false;
 	}
 
 	/**
@@ -201,11 +211,12 @@ abstract class DataObject
 	/**
 	 * Returns true, if object was modified
 	 *
-	 * @return bool
+	 * @param	string	$sField		optional field name
+	 * @return 	bool
 	 */
-	final protected function isModified()
+	final protected function isModified($sField = null)
 	{
-		return $this->bModified;
+		return isset($sFieldName) ? isset($ths->aModifiedFields[$sField]) : $this->bModified;
 	}
 
 	/**
