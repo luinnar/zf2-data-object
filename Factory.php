@@ -59,34 +59,20 @@ abstract class Factory
 	}
 
 	/**
-	 * Primary Key definition
+	 * Locked = ready
+	 *
+	 * @var bool
+	 */
+	private $bStructureLock = false;
+
+	/**
+	 * Data structure information
 	 *
 	 * @var array
 	 */
-	private $aPrimaryKey = null;
+	private $aStructure = [];
 
-	/**
-	 * DB table name
-	 *
-	 * @var string
-	 */
-	private $sTableName = null;
-
-	/**
-	 * Constructor, sets necessary data for the data object
-	 * Warning: In child class use this constructor!
-	 *
-	 * @param	string	$sTableName		name of DB table connected with model
-	 * @param	array	$aPrimaryKey	array with primay key fields
-	 * @return	Factory
-	 */
-	public function __construct($sTableName, array $aPrimaryKey)
-	{
-		$this->sTableName	= $sTableName;
-		$this->aPrimaryKey	= $aPrimaryKey;
-	}
-
-// Factory method
+// factory method
 
 	/**
 	 * Returns an array of objects with specified ID
@@ -190,8 +176,6 @@ abstract class Factory
 		return $this->createList($oSelect, $mOption);
 	}
 
-// additional methods
-
 	/**
 	 * Returns a paginator set on a particular page
 	 *
@@ -228,6 +212,34 @@ abstract class Factory
 						->setCurrentPageNumber($iPage)
 						->setItemCountPerPage($iCount);
 	}
+
+// object manipulation methods
+
+	/**
+	 * Perform SQL insert query and returns last inserted ID
+	 *
+	 * @param	array	$aData	data to save
+	 * @return	mixed
+	 */
+	protected function insert(array &$aData)
+	{
+		$oDb = self::getConnection();
+
+		// przygotowuję zapytanie
+		$oInsert = (new Insert())
+					->into($this->getTableName())
+					->values($aData);
+
+		// uruchamiam zapytanie
+		$oDb->query(
+			(new Sql($oDb))->getSqlStringForSqlObject($oInsert),
+			$oDb::QUERY_MODE_EXECUTE
+		);
+
+		return $oDb->getDriver()->getLastGeneratedValue();
+	}
+
+// additional methods
 
 	/**
 	 * Creates an array of objects from the results returned by the database
@@ -268,9 +280,9 @@ abstract class Factory
 	 *
 	 * @return	string
 	 */
-	final protected function getTableName()
+	protected function getTableName()
 	{
-		return $this->sTableName;
+		return $this->structureGet('table');
 	}
 
 	/**
@@ -278,9 +290,9 @@ abstract class Factory
 	 *
 	 * @return	array
 	 */
-	final protected function getPrimaryKey()
+	protected function getPrimaryKey()
 	{
-		return $this->aPrimaryKey;
+		return $this->structureGet('primary');
 	}
 
 	/**
@@ -290,7 +302,7 @@ abstract class Factory
 	 * @param	mixed	$mOption	additional options
 	 * @return	\Zend\Db\Sql\Select
 	 */
-	protected function getSelect(array $aFields = array('*'), $mOption = null)
+	protected function getSelect(array $aFields = ['*'], $mOption = null)
 	{
 		return (new Select())
 					->from($this->getTableName())
@@ -315,9 +327,10 @@ abstract class Factory
 	 */
 	protected function getPrimaryWhere($mId)
 	{
-		$oWhere = new Where();
+		$aPrimaryKey = $this->structureGet('primary');
+		$oWhere		 = new Where();
 
-		if(count($this->aPrimaryKey) > 1)
+		if(count($aPrimaryKey) > 1)
 		{
 			// single primary key
 			if(!isset($mId[0]))
@@ -330,7 +343,7 @@ abstract class Factory
 			{
 				$oWhere2 = new Where();
 
-				foreach($this->aPrimaryKey as $sField)
+				foreach($aPrimaryKey as $sField)
 				{
 					if(!isset($aPrimary[$sField]))
 					{
@@ -354,38 +367,104 @@ abstract class Factory
 		{
 			if(is_array($mId))
 			{
-				$oWhere->in($this->aPrimaryKey[0], $mId);
+				$oWhere->in($aPrimaryKey[0], $mId);
 			}
 			else
 			{
-				$oWhere->equalTo($this->aPrimaryKey[0], $mId);
+				$oWhere->equalTo($aPrimaryKey[0], $mId);
 			}
 		}
 
 		return $oWhere;
 	}
 
+// init methods
+
 	/**
-	 * Perform SQL insert query and returns last inserted ID
+	 * Add table to structure and lock it
 	 *
-	 * @param	array	$aData	data to save
+	 * @param	string	$sName		table name
+	 * @param	array	$aFields	fields
+	 * @param	array	$aPrimary	primary key definition
+	 * @return	void
+	 */
+	protected function initTable($sName, array $aFields, $aPrimary)
+	{
+		$this->structureSet([
+			'table'		=> $sName,
+			'fields'	=> $aFields,
+			'primary'	=> $aPrimary
+		]);
+		$this->structureLock();
+
+		return $this;
+	}
+
+// structure methods
+
+	/**
+	 * Retrives info about structure
+	 *
+	 * @param	string	$sField		(optional) field name
+	 * @param	mixed	$mDefault	(optional) default value for unset fields
 	 * @return	mixed
 	 */
-	final protected function insert(array &$aData)
+	final protected function structureGet($sField = null, $mDefault = null)
 	{
-		$oDb = self::getConnection();
+		if(empty($sField))
+		{
+			return $this->aStructure;
+		}
+		elseif(!array_key_exists($sField, $this->aStructure))
+		{
+			return $mDefault;
+		}
 
-		// przygotowuję zapytanie
-		$oInsert = (new Insert())
-					->into($this->getTableName())
-					->values($aData);
+		return $this->aStructure[$sField];
+	}
 
-		// uruchamiam zapytanie
-		$oDb->query(
-			(new Sql($oDb))->getSqlStringForSqlObject($oInsert),
-			$oDb::QUERY_MODE_EXECUTE
-		);
+	/**
+	 * Is structure locked
+	 *
+	 * @return	bool
+	 */
+	final protected function structureIsLocked()
+	{
+		return $this->bStructureLock;
+	}
 
-		return $oDb->getDriver()->getLastGeneratedValue();
+	/**
+	 * Locks structure data
+	 *
+	 * @return	void
+	 */
+	final protected function structureLock()
+	{
+		$this->bStructureLock = true;
+	}
+
+	/**
+	 * Sets information about DataObject structure
+	 *
+	 * @param	string|array	$mField		field name or array with structure data
+	 * @param	mixed			$mData		(optional) field value
+	 * @throws	/DataObject/Exception
+	 * @return	void
+	 */
+	final protected function structureSet($mField, $mData = null)
+	{
+		if($this->structureIsLocked())
+		{
+			throw new Exception('DataObject structure is locked');
+		}
+
+		if(is_array($mField))
+		{
+			$this->aStructure = $mField;
+
+			return;
+		}
+
+		$this->aStructure[$mField] = $mData;
 	}
 }
