@@ -1,5 +1,5 @@
 {
-	"name": "luinnar/DataObject",
+	"name": "luinnar/zf2-data-object",
 	"description": "DataObject library for Zend Framework 2",
 	"license": "MIT",
 	"require": {
