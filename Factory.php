@@ -4,8 +4,10 @@ namespace DataObject;
 
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\Sql\Expression;
+use Zend\Db\Sql\Delete;
 use Zend\Db\Sql\Insert;
 use Zend\Db\Sql\Select;
+use Zend\Db\Sql\Update;
 use Zend\Db\Sql\Sql;
 use Zend\Db\Sql\Where;
 use Zend\Db\ResultSet\ResultSet;
@@ -274,7 +276,7 @@ abstract class Factory
 	 * @param	array	$aData
 	 * @return	void
 	 */
-	public function update(array $mId, array $aData)
+	public function update($mId, array $aData)
 	{
 		try
 		{
