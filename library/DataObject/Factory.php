@@ -28,6 +28,7 @@ abstract class Factory
 
 	/**
 	 * Sets DB connection
+	 *
 	 * @param	Adapter		$oDb	DB connection
 	 * @throws	Exception
 	 * @return	void
@@ -43,10 +44,10 @@ abstract class Factory
 	}
 
 	/**
-	 * Sets DB connection
-	 * @param	Adapter		$oDb	DB connection
+	 * Gets DB connection
+	 *
 	 * @throws	Exception
-	 * @return	void
+	 * @return	Adapter
 	 */
 	static public function getConnection()
 	{
@@ -239,6 +240,61 @@ abstract class Factory
 		return $oDb->getDriver()->getLastGeneratedValue();
 	}
 
+	/**
+	 * Delete object with given ID
+	 *
+	 * @param	mixed	$mId	primary key value
+	 * @throws	\RuntimeException
+	 * @return	void
+	 */
+	public function delete($mId)
+	{
+		try
+		{
+			$oDelete = (new Delete($this->getTableName()))
+								->where($this->getPrimaryWhere($mId));
+
+			// wykonuje zapytanie
+			$oDb = Factory::getConnection();
+			$oDb->query(
+				(new Sql($oDb))->getSqlStringForSqlObject($oDelete),
+				$oDb::QUERY_MODE_EXECUTE
+			);
+		}
+		catch(\Exception $e)
+		{
+			throw new Exception('Error while deleting data', null, $e);
+		}
+	}
+
+	/**
+	 * Updates
+	 *
+	 * @param	mixed	$mId	primary key value
+	 * @param	array	$aData
+	 * @return	void
+	 */
+	public function update(array $mId, array $aData)
+	{
+		try
+		{
+			$oUpdate = (new Update($this->getTableName()))
+								->set($aData)
+								->where($this->getPrimaryWhere($mId));
+
+			// wykonuje zapytanie
+			$oDb = Factory::getConnection();
+			$oDb->query(
+				(new Sql($oDb))->getSqlStringForSqlObject($oUpdate),
+				$oDb::QUERY_MODE_EXECUTE
+			);
+		}
+		catch(\Exception $e)
+		{
+			throw new Exception('Error while updating data', null, $e);
+		}
+	}
+
 // additional methods
 
 	/**
@@ -323,7 +379,8 @@ abstract class Factory
 	/**
 	 * Returns SQL WHERE string created for the specified key fields
 	 *
-	 * @return string
+	 * @param	mixed	$mId	primary key value
+	 * @return	string
 	 */
 	protected function getPrimaryWhere($mId)
 	{

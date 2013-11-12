@@ -5,10 +5,10 @@ namespace DataObject\Structure;
 use DataObject\Exception;
 use Zend\Db\Sql\Select;
 
-trait Multi
+trait MultiFactory
 {
 	// definiuję niezbędne metody
-	use Base;
+	use BaseFactory;
 
 	/**
 	 * Returns a Select object

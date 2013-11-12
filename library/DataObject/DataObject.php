@@ -2,14 +2,6 @@
 
 namespace DataObject;
 
-use Zend\Db\Sql\Sql;
-
-use Zend\Db\Adapter\Adapter;
-use Zend\Db\Sql\Delete;
-use Zend\Db\Sql\Select;
-use Zend\Db\Sql\Update;
-use Zend\Db\Sql\Where;
-
 /**
  * Abstract class using to create models
  *
@@ -20,18 +12,25 @@ use Zend\Db\Sql\Where;
 abstract class DataObject
 {
 	/**
-	 * Instance of db adapter
-	 *
-	 * @var Zend\Db\Adapter\Adapter
-	 */
-	protected $oDb;
-
-	/**
-	 * Primary Key definition
+	 * DataObject fields
 	 *
 	 * @var array
 	 */
-	private $aPrimaryValue = array();
+	protected $aData;
+
+	/**
+	 * Parent factory
+	 *
+	 * @var Factory
+	 */
+	protected $oFactory;
+
+	/**
+	 * Primary Key value
+	 *
+	 * @var mixed
+	 */
+	private $mPrimaryValue;
 
 	/**
 	 * The list of modified fields
@@ -39,13 +38,6 @@ abstract class DataObject
 	 * @var array
 	 */
 	private $aModifiedFields = array();
-
-	/**
-	 * Name of DB table
-	 *
-	 * @var string
-	 */
-	private $sTableName;
 
 	/**
 	 * Is object removed
@@ -65,13 +57,15 @@ abstract class DataObject
 	 * Constructor, sets necessary data for the data object
 	 * Warning: In child class use this constructor!
 	 *
-	 * @param	string	$sTableName		name of DB table connected with model
-	 * @param	array	$aPrimaryKey	array with prmiary key description (<field name> => <field value>)
-	 * @return	DataObject
+	 * @param	array	$aData		model data
+	 * @param	mixed	$mPrimary	primary key value
+	 * @param	Factory	$oFactory	DataObject factory
 	 */
-	public function __construct($sTableName, array $aPrimaryKey)
+	public function __construct(array $aData, $mPrimary, Factory $oFactory)
 	{
-		$this->doInit($sTableName, $aPrimaryKey);
+		$this->aData		 = $aData;
+		$this->mPrimaryValue = $mPrimary;
+		$this->oFactory		 = $oFactory;
 	}
 
 	/**
@@ -84,7 +78,7 @@ abstract class DataObject
 		// analizuję pola klasy i odrzucam pole bazy danych
 		foreach((new \ReflectionClass($this))->getProperties() as $oProperty)
 		{
-			if($oProperty->getName() != 'oDb')
+			if($oProperty->getName() != 'oFactory')
 			{
 				$aResult[] = $oProperty->getName();
 			}
@@ -98,32 +92,26 @@ abstract class DataObject
 	 */
 	public function __wakeup()
 	{
-		$this->oDb = Factory::getConnection();
+		$sFactory =	get_class() .'Factory';
+		$this->oFactory = new $sFactory;
 	}
 
 	/**
 	 * Delete object from DB
 	 *
-	 * @return void
+	 * @throws	Exception
+	 * @return	void
 	 */
 	public function delete()
 	{
-		$oDelete = (new Delete($this->getTableName()))
-							->where($this->getPrimaryWhere());
-
-		// wykonuje zapytanie
-		$oDb = Factory::getConnection();
-		$oDb->query(
-			(new Sql($oDb))->getSqlStringForSqlObject($oDelete),
-			$oDb::QUERY_MODE_EXECUTE
-		);
-
+		$this->oFactory->delete($this->mPrimaryValue);
 		$this->bDeleted = true;
 	}
 
 	/**
 	 * Save object to DB
 	 *
+	 * @throws	Exception
 	 * @return	void
 	 */
 	public function save()
@@ -133,41 +121,15 @@ abstract class DataObject
 		{
 			throw new Exception('Object is already deleted, you cannot save it.');
 		}
-
 		// check whether any data has been modified
-		if($this->bModified)
+		elseif(!$this->bModified)
 		{
-			$oUpdate = (new Update($this->getTableName()))
-								->set($this->aModifiedFields)
-								->where($this->getPrimaryWhere());
-
-			// wykonuje zapytanie
-			$oDb = Factory::getConnection();
-			$oDb->query(
-				(new Sql($oDb))->getSqlStringForSqlObject($oUpdate),
-				$oDb::QUERY_MODE_EXECUTE
-			);
-
-			$this->clearModified();
-		}
-	}
-
-	/**
-	 * Initialise data object
-	 *
-	 * @param	string	$sTableName		name of DB table connected with model
-	 * @param	array	$aPrimaryKey	array with prmiary key description (<field name> => <field value>)
-	 */
-	final protected function doInit($sTableName, array $aPrimaryKey)
-	{
-		if(!empty($this->oDb))
-		{
+			// WARNING RETURN
 			return;
 		}
 
-		$this->oDb				= Factory::getConnection();
-		$this->sTableName		= $sTableName;
-		$this->aPrimaryValue	= $aPrimaryKey;
+		$this->oFactory->update($this->mPrimaryValue, $this->aModifiedFields);
+		$this->clearModified();
 	}
 
 	/**
@@ -179,33 +141,6 @@ abstract class DataObject
 	{
 		$this->aModifiedFields = array();
 		$this->bModified = false;
-	}
-
-	/**
-	 * Returns DB table name
-	 *
-	 * @return	string
-	 */
-	protected function getTableName()
-	{
-		return $this->sTableName;
-	}
-
-	/**
-	 * Returns where statement made from primary key
-	 *
-	 * @return \Zend\Db\Sql\Where
-	 */
-	protected function getPrimaryWhere()
-	{
-		$oWhere = new Where();
-
-		foreach($this->aPrimaryValue as $sField => $mValue)
-		{
-			$oWhere->equalTo($sField, $mValue);
-		}
-
-		return $oWhere;
 	}
 
 	/**

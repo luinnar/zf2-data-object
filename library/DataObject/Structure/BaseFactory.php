@@ -2,7 +2,7 @@
 
 namespace DataObject\Structure;
 
-trait Base
+trait BaseFactory
 {
 	abstract protected function structureGet($sField = null, $mDefault = null);
 
