@@ -12,6 +12,8 @@ use Zend\Db\Sql\Delete;
 use Zend\Db\Sql\Insert;
 use Zend\Db\Sql\Update;
 use Zend\Db\ResultSet\ResultSet;
+use Zend\ServiceManager\ServiceLocatorAwareInterface;
+use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
 /**
  * Abstract class using to create factory for models
@@ -20,8 +22,10 @@ use Zend\Db\ResultSet\ResultSet;
  * @license		New BSD License
  * @author		Mateusz Juściński, Mateusz Kohut, Daniel Kózka
  */
-abstract class Factory
+abstract class Factory implements ServiceLocatorAwareInterface
 {
+	use ServiceLocatorAwareTrait;
+
 	/**
 	 * Instance of db adapter
 	 *
