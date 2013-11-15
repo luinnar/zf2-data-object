@@ -2,7 +2,9 @@
 
 namespace DataObject\Type;
 
+use DataObject\Exception;
 use DataObject\Factory;
+use DataObject\Helper\Multitable;
 use Zend\Db\Sql\Select;
 
 /**
@@ -13,6 +15,8 @@ use Zend\Db\Sql\Select;
  */
 abstract class PluginFactory extends Factory
 {
+	use Multitable;
+
 	/**
 	 * Adds join to select query
 	 *
@@ -50,5 +54,16 @@ abstract class PluginFactory extends Factory
 		}
 	}
 
-	abstract private function _update($mId, array $aData);
+	/**
+
+	 */
+	protected function createObject(array $aRow, $mOption = null)
+	{
+		throw new Exception('Cannot create plugin with no parent object');
+	}
+
+	/**
+	 * Oryginal update method
+	 */
+	abstract protected function _update($mId, array $aData);
 }
