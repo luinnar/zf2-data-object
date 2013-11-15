@@ -63,9 +63,7 @@ trait Base
 	 */
 	public function __construct(array $aData, $mPrimary, Factory $oFactory)
 	{
-		$this->aData			= $aData;
-		$this->_mPrimaryValue	= $mPrimary;
-		$this->_oFactory		= $oFactory;
+		$this->initStructure($aData, $mPrimary, $oFactory);
 	}
 
 	/**
@@ -128,7 +126,7 @@ trait Base
 			return;
 		}
 
-		$this->_oFactory->update($this->_mPrimaryValue, $this->_aModifiedFields);
+		$this->_oFactory->update($this->_mPrimaryValue, $this->getModified());
 		$this->clearModified();
 	}
 
@@ -141,6 +139,31 @@ trait Base
 	{
 		$this->_aModifiedFields = [];
 		$this->_bModified = false;
+	}
+
+	/**
+	 * Returns modyfied fields
+	 *
+	 * @return	array
+	 */
+	protected function getModified()
+	{
+		return $this->_aModifiedFields;
+	}
+
+	/**
+	 * Sets structure information
+	 *
+	 * @param	array	$aData		model data
+	 * @param	mixed	$mPrimary	primary key value
+	 * @param	Factory	$oFactory	DataObject factory
+	 * @return	void
+	 */
+	protected function initStructure(array $aData, $mPrimary, Factory $oFactory)
+	{
+		$this->aData			= $aData;
+		$this->_mPrimaryValue	= $mPrimary;
+		$this->_oFactory		= $oFactory;
 	}
 
 	/**

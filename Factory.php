@@ -18,7 +18,6 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
 /**
  * Abstract class using to create factory for models
  *
- * @copyright	Copyright (c) 2011, Autentika Sp. z o.o.
  * @license		New BSD License
  * @author		Mateusz Juściński, Mateusz Kohut, Daniel Kózka
  */

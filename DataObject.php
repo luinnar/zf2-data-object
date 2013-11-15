@@ -5,9 +5,8 @@ namespace DataObject;
 /**
  * Abstract class using to create models
  *
- * @copyright	Copyright (c) 2011, Autentika Sp. z o.o.
  * @license		New BSD License
- * @author		Mateusz Juściński, Mateusz Kohut, Daniel Kózka
+ * @author		Mateusz Juściński
  */
 abstract class DataObject
 {
@@ -33,6 +32,16 @@ abstract class DataObject
 	 * @return	void
 	 */
 	abstract protected function clearModified();
+
+	/**
+	 * Sets structure information
+	 *
+	 * @param	array	$aData		model data
+	 * @param	mixed	$mPrimary	primary key value
+	 * @param	Factory	$oFactory	DataObject factory
+	 * @return	void
+	 */
+	abstract protected function initStructure(array $aData, $mPrimary, Factory $oFactory);
 
 	/**
 	 * Returns true, if object was modified

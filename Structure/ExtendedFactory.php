@@ -2,55 +2,17 @@
 
 namespace DataObject\Structure;
 
-use DataObject\Exception;
-use Zend\Db\Sql\Select;
+use Zend\Db\Sql\Expression;
 
-trait MultiFactory
+trait ExtendedFactory
 {
-	// definiuję niezbędne metody
-	use BaseFactory;
-
-	/**
-	 * Returns a Select object
-	 *
-	 * @param	mixed	$mFields	fields to select
-	 * @param	mixed	$mOption	additional options
-	 * @return	\Zend\Db\Sql\Select
-	 */
-	protected function getSelect(array $aFields = ['*'], $mOption = null)
-	{
-		if(!$this->structureIsLocked())
-		{
-			throw new Exception('DataObject structure wasn\'t locked');
-		}
-
-		// get all fields from all tables
-		if($aFields == ['*'])
-		{
-			$aFields = $this->structureGet('tables');
-		}
-
-		// creates select statement
-		$oSelect = (new Select())->from($aFields);
-
-		foreach($this->structureGet('connections', []) as $sTable => $sConnect)
-		{
-			$oSelect->join($sTable, $aStruct['tables'][$sTable], null);
-		}
-
-		return $oSelect;
+	use BaseFactory {
+		delete as private _delete;
+		insert as private _insert;
+		update as private _update;
 	}
 
-	/**
-	 * Returns a Select object for Paginator Count
-	 *
-	 * @param	mixed	$mOption	additional options
-	 * @return	Zend_Db_Select
-	 */
-	protected function getCountSelect($mOption = null)
-	{
-		return $this->getSelect(['count' => new Expression('COUNT(*)')], $mOption);
-	}
+// single object manipulation
 
 	/**
 	 * Perform SQL insert query and returns last inserted ID
@@ -58,56 +20,69 @@ trait MultiFactory
 	 * @param	array	$aData	data to save
 	 * @return	mixed
 	 */
-	final protected function insert(array &$aData)
+	protected function insert(array &$aData)
 	{
-	}
+		parent::insert($aData);
 
-// init methods
-
-	/**
-	 * Adds join definition
-	 *
-	 * @param	string	$sConnection	join definition
-	 * @return	/DataObject/Factory
-	 */
-	protected function initConnection($sTable, $sConnection)
-	{
-		$aTables = $this->structureGet('tables', []);
-
-		// no table structure information
-		if(!isset($aTables[$sTable]))
-		{
-			throw new Exception('No information about table "'. $sTable .'" schema');
-		}
-
-		$aConn = $this->structureGet('connection', []);
-		$aConn[$sTable] = $sConnection;
-
-		$this->structureSet('connection', $aConn);
-
-		return $this;
+		return $this->_insert($aData);
 	}
 
 	/**
-	 * Adds table definition
+	 * Delete object with given ID
 	 *
-	 * @param	string	$sName		table name
-	 * @param	array	$aFields	fields names
-	 * @param	array	$aPrimary	(optional) array with primary key
-	 * @return	/DataObject/Factory
+	 * @param	mixed	$mId	primary key value
+	 * @throws	\RuntimeException
+	 * @return	void
 	 */
-	protected function initTable($sName, array $aFields, array $aPrimary = [])
+	public function delete($mId)
 	{
-		$aTables = $this->structureGet('tables', []);
-		$aTables[$sName] = $aFields;
+		parent::delete($mId);
 
-		$this->structureSet('tables', $aTables);
+		return $this->_delete($mId);
+	}
 
-		if(!empty($aPrimary))
+	/**
+	 * Updates
+	 *
+	 * @param	mixed	$mId	primary key value
+	 * @param	array	$aData
+	 * @return	void
+	 */
+	public function update($mId, array $aData)
+	{
+		parent::update($mId, $aData);
+
+		return $this->_update($mId, $aData);
+	}
+
+// structure methods
+
+	/**
+	 * Prepares fields list for select
+	 *
+	 * @param	array	$aData	array with tables structure
+	 * @return	array
+	 */
+	protected function _doPrepareFields(array &$aData)
+	{
+		$aResult = [];
+
+		foreach($aData as $sTable => &$mFields)
 		{
-			$this->structureSet('primary', $aPrimary);
+			// Zend\Db\Sql\Expression
+			if($mFields instanceof Expression)
+			{
+				$aResult[$sTable] = $mFields;
+
+				continue;
+			}
+
+			foreach($mFields as $sField)
+			{
+				$aResult[] = $sTable .'.'. $sField .' AS '. $sTable .'-'. $sField;
+			}
 		}
 
-		return $this;
+		return $aResult;
 	}
 }
