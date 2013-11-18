@@ -160,13 +160,15 @@ trait BaseFactory
 						throw new Exception('No value for key part: ' . $sField);
 					}
 
+					$sFieldName = self::$_sTableName .'.'. $sField;
+
 					if(is_array($aPrimary[$sField]))
 					{
-						$oWhere2->in($sField, $aPrimary[$sField]);
+						$oWhere2->in($sFieldName, $aPrimary[$sField]);
 					}
 					else
 					{
-						$oWhere2->equalTo($sField, $aPrimary[$sField]);
+						$oWhere2->equalTo($sFieldName, $aPrimary[$sField]);
 					}
 				}
 
@@ -175,13 +177,15 @@ trait BaseFactory
 		}
 		else
 		{
+			$sFieldName = self::$_sTableName .'.'. $aPrimaryKey[0];
+
 			if(is_array($mId))
 			{
-				$oWhere->in($aPrimaryKey[0], $mId);
+				$oWhere->in($sFieldName, $mId);
 			}
 			else
 			{
-				$oWhere->equalTo($aPrimaryKey[0], $mId);
+				$oWhere->equalTo($sFieldName, $mId);
 			}
 		}
 

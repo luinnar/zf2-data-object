@@ -2,12 +2,9 @@
 
 namespace DataObject\Type;
 
+use DataObject\DataObject;
 use DataObject\Exception;
-use DataObject\Factory;
 use DataObject\Helper\Multitable;
-use DataObject\Type\Pluginable;
-use Zend\Db\Sql\Select;
-use Zend\Db\Sql\Sql;
 
 /**
  * DataObject factory with plugins
@@ -15,7 +12,7 @@ use Zend\Db\Sql\Sql;
  * @license		New BSD License
  * @author		Mateusz Juściński
  */
-abstract class PluginableFactory extends Factory
+trait PluginableFactory
 {
 	use Multitable;
 
@@ -81,43 +78,6 @@ abstract class PluginableFactory extends Factory
 // DataObject factory methods
 
 	/**
-	 * Creates an array of objects from the results returned by the database
-	 *
-	 * @param	Select	$aDbResult	Zend/Db/Sql/Select object
-	 * @param	mixed	$mOption	aditional options
-	 * @return array
-	 */
-	protected function createList(Select $oSelect, $mOption = null)
-	{
-		$oDb	= self::getConnection();
-		$oDbRes = $oDb->query(
-					(new Sql($oDb))->getSqlStringForSqlObject($oSelect),
-					$oDb::QUERY_MODE_EXECUTE
-				);
-
-		$aResult = [];
-
-		foreach($oDbRes as $aRow)
-		{
-			$aRow = $this->multitablePrefixRemove($aRow->getArrayCopy());
-
-			// creating main instance from primary data
-			$oModel = $this->createObject(
-							$aRow[$this->multitableDefaultPrefix()],
-							$mOption
-						);
-			// deleting used data
-			unset($aRow[$this->multitableDefaultPrefix()]);
-			// loading current plugins into model instance
-			$this->loadInto($oModel, $aRow);
-
-			$aResult[] = $oModel;
-		}
-
-		return $aResult;
-	}
-
-	/**
 	 * (non-PHPdoc)
 	 * @see DataObject\Factory::getSelect()
 	 */
@@ -142,17 +102,21 @@ abstract class PluginableFactory extends Factory
 	 * @param	array		$aData		plugins data
 	 * @return	Pluginable
 	 */
-	protected function loadInto(Pluginable $oModel, array $aData)
+	protected function loadInto(DataObject $oModel, array $aData)
 	{
 		foreach($aData as $sPlugin => $aFields)
 		{
-			if(empty(self::$aPlugins[$sPlugin]))
+			if(empty($this->aCurrentPlugins[$sPlugin]))
 			{
-				throw new Exception('Plugin "'. $sPluginName .'" is not loaded');
+				throw new Exception('Plugin "'. $sPlugin .'" is not loaded');
 			}
 
-			$oFactory = self::$aPlugins[$sPlugin];
-			$oModel->loadPlugin($oFactory->getPluginObject($aFields), $sPlugin);
+			$oFactory = $this->aCurrentPlugins[$sPlugin];
+
+			$oModel->loadPlugin(
+				$oFactory->getPluginObject($aFields, $oModel),
+				$sPlugin
+			);
 		}
 
 		return $oModel;

@@ -3,7 +3,7 @@
 namespace DataObject\Type;
 
 use DataObject\Factory;
-use DataObject\Pluginable;
+use DataObject\DataObject;
 
 /**
  * DataObject plugin
@@ -11,7 +11,7 @@ use DataObject\Pluginable;
  * @license		New BSD License
  * @author		Mateusz Juściński
  */
-abstract class Plugin extends DataObject
+trait Plugin
 {
 	/**
 	 * Plugin-owner object
@@ -29,7 +29,7 @@ abstract class Plugin extends DataObject
 	 * @param	Pluginable	$oOwner		plugin-owner object
 	 * @param	Factory		$oFactory	DataObject factory
 	 */
-	public function __construct(array $aData, $mPrimary, Pluginable $oOwner, Factory $oFactory)
+	public function __construct(array $aData, $mPrimary, DataObject $oOwner, Factory $oFactory)
 	{
 		$this->initStructure($aData, $mPrimary, $oFactory);
 		$this->oOwner = $oOwner;

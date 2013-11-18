@@ -29,7 +29,7 @@ trait Multitable
 
 		foreach($aFields as &$sField)
 		{
-			$aResult[$sPrefix .'.'. $sField] = $sPrefix .'.'. $sField;
+			$aResult[$sPrefix .'.'. $sField] = $sField;
 		}
 
 		return $aResult;

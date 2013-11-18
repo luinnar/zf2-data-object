@@ -4,7 +4,6 @@ namespace DataObject\Type;
 
 use DataObject\DataObject;
 use DataObject\Exception;
-use DataObject\Plugin;
 
 /**
  * DataObject with plugins
@@ -12,21 +11,14 @@ use DataObject\Plugin;
  * @license		New BSD License
  * @author		Mateusz Juściński
  */
-abstract class Pluginable extends DataObject
+trait Pluginable
 {
 	/**
 	 * Loaded plugins
 	 *
 	 * @var array
 	 */
-	protected $aPlugins = [];
-
-	/**
-	 * Returns instance ID
-	 *
-	 * @return	mixed
-	 */
-	abstract public function getId();
+	protected $_aPlugins = [];
 
 	/**
 	 * Return loaded plugin
@@ -37,12 +29,12 @@ abstract class Pluginable extends DataObject
 	 */
 	public function getPlugin($sName)
 	{
-		if(!isset($this->aPlugins[$sName]))
+		if(!isset($this->_aPlugins[$sName]))
 		{
 			throw new Exception('Plugin "'. $sName .'" is not loaded');
 		}
 
-		return $this->aPlugins[$sName];
+		return $this->_aPlugins[$sName];
 	}
 
 	/**
@@ -53,13 +45,13 @@ abstract class Pluginable extends DataObject
 	 * @throws	Exception
 	 * @return	void
 	 */
-	public function loadPlugin(Plugin $oPlugin, $sName)
+	public function loadPlugin(DataObject $oPlugin, $sName)
 	{
 		if($oPlugin->getOwner() != $this)
 		{
 			throw new Exception('I\'m not the plugin owner');
 		}
 
-		$this->aPlugins[$sName] = $oPlugin;
+		$this->_aPlugins[$sName] = $oPlugin;
 	}
 }

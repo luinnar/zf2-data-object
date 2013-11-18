@@ -2,8 +2,8 @@
 
 namespace DataObject\Type;
 
+use DataObject\DataObject;
 use DataObject\Exception;
-use DataObject\Factory;
 use DataObject\Helper\Multitable;
 use Zend\Db\Sql\Select;
 
@@ -13,7 +13,7 @@ use Zend\Db\Sql\Select;
  * @license		New BSD License
  * @author		Mateusz Juściński
  */
-abstract class PluginFactory extends Factory
+trait PluginFactory
 {
 	use Multitable;
 
@@ -32,7 +32,7 @@ abstract class PluginFactory extends Factory
 	 * @param	array	$aData	single row from DB
 	 * @return	DataObject
 	 */
-	abstract public function getPluginObject(array $aData);
+	abstract public function getPluginObject(array $aData, DataObject $oOwner);
 
 	/**
 	 * Update or save plugin
