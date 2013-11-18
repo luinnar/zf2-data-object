@@ -27,6 +27,28 @@ abstract class DataObject
 	abstract public function save();
 
 	/**
+	 * Returns array with modyfied fields
+	 *
+	 * @return 	array
+	 */
+	abstract public function getModifiedFields();
+
+	/**
+	 * Returns primary key value
+	 *
+	 * @return	mixed
+	 */
+	abstract public function getPrimaryField();
+
+	/**
+	 * Returns true, if object was modified
+	 *
+	 * @param	string	$sField		optional field name
+	 * @return 	bool
+	 */
+	abstract public function hasModifiedFields($sField = null);
+
+	/**
 	 * Clears information about data modifications
 	 *
 	 * @return	void
@@ -42,14 +64,6 @@ abstract class DataObject
 	 * @return	void
 	 */
 	abstract protected function initStructure(array $aData, $mPrimary, Factory $oFactory);
-
-	/**
-	 * Returns true, if object was modified
-	 *
-	 * @param	string	$sField		optional field name
-	 * @return 	bool
-	 */
-	abstract protected function isModified($sField = null);
 
 	/**
 	 * Set new DB field value

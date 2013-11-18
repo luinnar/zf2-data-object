@@ -54,4 +54,44 @@ trait Pluginable
 
 		$this->_aPlugins[$sName] = $oPlugin;
 	}
+
+	/**
+	 * (non-PHPdoc)
+	 * @see DataObject\DataObject::delete()
+	 */
+	public function delete()
+	{
+		foreach($this->_aPlugins as $oPlugin)
+		{
+			$oPlugin->delete();
+		}
+
+		$this->_delete();
+	}
+
+	/**
+	 * (non-PHPdoc)
+	 * @see DataObject\DataObject::save()
+	 */
+	public function save()
+	{
+		foreach($this->_aPlugins as $oPlugin)
+		{
+			$oPlugin->save();
+		}
+
+		$this->_save();
+	}
+
+	/**
+	 * (non-PHPdoc)
+	 * @see DataObject\DataObject::delete()
+	 */
+	abstract protected function _delete();
+
+	/**
+	 * (non-PHPdoc)
+	 * @see DataObject\DataObject::save()
+	 */
+	abstract protected function _save();
 }

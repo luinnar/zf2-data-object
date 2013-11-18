@@ -21,6 +21,13 @@ trait Plugin
 	protected $oOwner;
 
 	/**
+	 * Id plugin saved
+	 *
+	 * @var bool
+	 */
+	private $_bSaved;
+
+	/**
 	 * Constructor, sets necessary data for the data object
 	 * Warning: In child class use this constructor!
 	 *
@@ -32,7 +39,8 @@ trait Plugin
 	public function __construct(array $aData, $mPrimary, DataObject $oOwner, Factory $oFactory)
 	{
 		$this->initStructure($aData, $mPrimary, $oFactory);
-		$this->oOwner = $oOwner;
+		$this->oOwner	= $oOwner;
+		$this->_bSaved	= !empty($mPrimary);
 	}
 
 	/**
@@ -44,4 +52,31 @@ trait Plugin
 	{
 		return $this->oOwner;
 	}
+
+	/**
+	 * Is plugin saved
+	 *
+	 * @return	bool
+	 */
+	public function isSaved()
+	{
+		return $this->_bSaved;
+	}
+
+	/**
+	 * (non-PHPdoc)
+	 * @see DataObject\DataObject::save()
+	 */
+	public function save()
+	{
+		$this->_save();
+		$this->_bSaved = true;
+		$this->_mPrimaryValue = $this->getOwner()->getPrimaryField();
+	}
+
+	/**
+	 * (non-PHPdoc)
+	 * @see DataObject\DataObject::save()
+	 */
+	abstract protected function _save();
 }

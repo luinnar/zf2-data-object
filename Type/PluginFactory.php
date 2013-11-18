@@ -35,27 +35,44 @@ trait PluginFactory
 	abstract public function getPluginObject(array $aData, DataObject $oOwner);
 
 	/**
-	 * Update or save plugin
-	 *
-	 * @param	mixed	$mId	primary key value
-	 * @param	array	$aData	data to save
-	 * @return	mixed
+	 * (non-PHPdoc)
+	 * @see DataObject\Factory::delete()
 	 */
-	public function update($mId, array $aData)
+	public function delete(DataObject $oModel)
 	{
-		// object is not saved
-		if(empty($mId))
+		if($oModel->isSaved())
 		{
-			$this->insert($aData);
-		}
-		else
-		{
-			$this->_update($mId, $aData);
+			$this->_delete($oModel);
 		}
 	}
 
 	/**
+	 * (non-PHPdoc)
+	 * @see DataObject\Factory::update()
+	 */
+	public function update(DataObject $oModel)
+	{
+		if($oModel->isSaved())
+		{
+			$this->_update($oModel);
+		}
+		else
+		{
+			$this->create($oModel);
+		}
+	}
 
+	/**
+	 * Saves new plugin instance into database
+	 *
+	 * @param	DataObcjet	$oModel		instance to save
+	 * @return	void
+	 */
+	abstract protected function create(DataObject $oModel);
+
+	/**
+	 * (non-PHPdoc)
+	 * @see DataObject\Factory::createObject()
 	 */
 	protected function createObject(array $aRow, $mOption = null)
 	{
@@ -63,7 +80,14 @@ trait PluginFactory
 	}
 
 	/**
-	 * Oryginal update method
+	 * (non-PHPdoc)
+	 * @see DataObject\Factory::delete()
 	 */
-	abstract protected function _update($mId, array $aData);
+	abstract protected function _delete(DataObject $oModel);
+
+	/**
+	 * (non-PHPdoc)
+	 * @see DataObject\Factory::update()
+	 */
+	abstract protected function _update(DataObject $oModel);
 }

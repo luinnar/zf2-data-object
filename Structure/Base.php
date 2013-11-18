@@ -94,6 +94,8 @@ trait Base
 		$this->_oFactory = new $sFactory;
 	}
 
+// model manipulation methods
+
 	/**
 	 * Delete object from DB
 	 *
@@ -102,7 +104,7 @@ trait Base
 	 */
 	public function delete()
 	{
-		$this->_oFactory->delete($this->_mPrimaryValue);
+		$this->_oFactory->delete($this);
 		$this->_bDeleted = true;
 	}
 
@@ -120,14 +122,47 @@ trait Base
 			throw new Exception('Object is already deleted, you cannot save it.');
 		}
 		// check whether any data has been modified
-		elseif(!$this->isModified())
+		elseif(!$this->hasModifiedFields())
 		{
 			// WARNING RETURN
 			return;
 		}
 
-		$this->_oFactory->update($this->_mPrimaryValue, $this->getModified());
+		$this->_oFactory->update($this);
 		$this->clearModified();
+	}
+
+// model information
+
+	/**
+	 * Returns modyfied fields
+	 *
+	 * @return	array
+	 */
+	public function getModifiedFields()
+	{
+		return $this->_aModifiedFields;
+	}
+
+	/**
+	 * Returns primary key value
+	 *
+	 * @return	mixed
+	 */
+	public function getPrimaryField()
+	{
+		return $this->_mPrimaryValue;
+	}
+
+	/**
+	 * Returns true, if object was modified
+	 *
+	 * @param	string	$sField		optional field name
+	 * @return 	bool
+	 */
+	public function hasModifiedFields($sField = null)
+	{
+		return isset($sFieldName) ? isset($ths->_aModifiedFields[$sField]) : $this->_bModified;
 	}
 
 	/**
@@ -139,16 +174,6 @@ trait Base
 	{
 		$this->_aModifiedFields = [];
 		$this->_bModified = false;
-	}
-
-	/**
-	 * Returns modyfied fields
-	 *
-	 * @return	array
-	 */
-	protected function getModified()
-	{
-		return $this->_aModifiedFields;
 	}
 
 	/**
@@ -164,17 +189,6 @@ trait Base
 		$this->aData			= $aData;
 		$this->_mPrimaryValue	= $mPrimary;
 		$this->_oFactory		= $oFactory;
-	}
-
-	/**
-	 * Returns true, if object was modified
-	 *
-	 * @param	string	$sField		optional field name
-	 * @return 	bool
-	 */
-	protected function isModified($sField = null)
-	{
-		return isset($sFieldName) ? isset($ths->_aModifiedFields[$sField]) : $this->_bModified;
 	}
 
 	/**

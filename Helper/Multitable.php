@@ -2,8 +2,6 @@
 
 namespace DataObject\Helper;
 
-use DataObject\Factory;
-
 trait Multitable
 {
 	/**

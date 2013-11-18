@@ -219,16 +219,15 @@ abstract class Factory implements ServiceLocatorAwareInterface
 	 * @throws	\RuntimeException
 	 * @return	void
 	 */
-	abstract public function delete($mId);
+	abstract public function delete(DataObject $oModel);
 
 	/**
 	 * Updates
 	 *
-	 * @param	mixed	$mId	primary key value
-	 * @param	array	$aData
+	 * @param	DataObject $oModel	DataObject to save
 	 * @return	void
 	 */
-	abstract public function update($mId, array $aData);
+	abstract public function update(DataObject $oModel);
 
 // additional methods
 

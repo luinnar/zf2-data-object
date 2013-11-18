@@ -2,6 +2,7 @@
 
 namespace DataObject\Structure;
 
+use DataObject\DataObject;
 use DataObject\Exception;
 use DataObject\Factory;
 use Zend\Db\Sql\Expression;
@@ -64,16 +65,16 @@ trait BaseFactory
 	/**
 	 * Delete object with given ID
 	 *
-	 * @param	mixed	$mId	primary key value
+	 * @param	DataObject $oModel	DataObject instance to delete
 	 * @throws	\RuntimeException
 	 * @return	void
 	 */
-	public function delete($mId)
+	public function delete(DataObject $oModel)
 	{
 		try
 		{
 			$oDelete = (new Delete(self::$_sTableName))
-								->where($this->getPrimaryWhere($mId));
+								->where($this->getPrimaryWhere($oModel->getPrimaryField()));
 
 			// wykonuje zapytanie
 			$oDb = Factory::getConnection();
@@ -91,17 +92,21 @@ trait BaseFactory
 	/**
 	 * Updates
 	 *
-	 * @param	mixed	$mId	primary key value
-	 * @param	array	$aData
+	 * @param	DataObject $oModel	DataObject instance to save
 	 * @return	void
 	 */
-	public function update($mId, array $aData)
+	public function update(DataObject $oModel)
 	{
+		if(!$oModel->hasModifiedFields())
+		{
+			return;
+		}
+
 		try
 		{
 			$oUpdate = (new Update(self::$_sTableName))
-								->set($aData)
-								->where($this->getPrimaryWhere($mId));
+								->set($oModel->getModifiedFields())
+								->where($this->getPrimaryWhere($oModel->getPrimaryField()));
 
 			// wykonuje zapytanie
 			$oDb = Factory::getConnection();
