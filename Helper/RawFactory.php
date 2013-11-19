@@ -22,13 +22,7 @@ trait RawFactory
 					$oDb::QUERY_MODE_EXECUTE
 				);
 
-		$aResult = [];
-		foreach($oDbRes as $oRow)
-		{
-			$aResult[] = (array) $oRow; // ArrayObject => array
-		}
-
-		return $aResult;
+		return $oDbRes->toArray();
 	}
 
 	/**
@@ -39,16 +33,9 @@ trait RawFactory
 	 */
 	protected function fetchRawPairs(Select $oSelect)
 	{
-		$oDb	= self::getConnection();
-		$oDbRes = $oDb->query(
-					(new Sql($oDb))->getSqlStringForSqlObject($oSelect),
-					$oDb::QUERY_MODE_EXECUTE
-				);
-
 		$aResult = [];
-		foreach($oDbRes as $oRow)
+		foreach($this->fetchRawAll($oSelect) as $aRow)
 		{
-			$aRow = (array) $oRow;
 			$sKey = array_shift($aRow);
 			$aResult[$sKey] = array_shift($aRow);
 		}
@@ -64,16 +51,9 @@ trait RawFactory
 	 */
 	protected function fetchRawColumn(Select $oSelect)
 	{
-		$oDb	= self::getConnection();
-		$oDbRes = $oDb->query(
-					(new Sql($oDb))->getSqlStringForSqlObject($oSelect),
-					$oDb::QUERY_MODE_EXECUTE
-				);
-
 		$aResult = [];
-		foreach($oDbRes as $oRow)
+		foreach($this->fetchRawAll($oSelect) as $aRow)
 		{
-			$aRow = (array) $oRow;
 			$aResult[] = array_shift($aRow);
 		}
 
