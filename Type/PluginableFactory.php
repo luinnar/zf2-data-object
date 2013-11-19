@@ -83,7 +83,7 @@ trait PluginableFactory
 	 */
 	protected function getSelect(array $aFields = ['*'], $mOption = null)
 	{
-		$oSelect = $this->_getSelect($aFields, $mOption);
+		$oSelect = parent::getSelect($aFields, $mOption);
 
 		foreach($this->aCurrentPlugins as $oFactory)
 		{
@@ -137,9 +137,4 @@ trait PluginableFactory
 
 		self::$aPlugins = $aPlugins;
 	}
-
-	/**
-	 * Structure select method
-	 */
-	abstract protected function _getSelect(array $aFields = ['*'], $mOption = null);
 }

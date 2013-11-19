@@ -42,7 +42,7 @@ trait PluginFactory
 	{
 		if($oModel->isSaved())
 		{
-			$this->_delete($oModel);
+			parent::delete($oModel);
 		}
 	}
 
@@ -54,7 +54,7 @@ trait PluginFactory
 	{
 		if($oModel->isSaved())
 		{
-			$this->_update($oModel);
+			parent::update($oModel);
 		}
 		else
 		{
@@ -78,16 +78,4 @@ trait PluginFactory
 	{
 		throw new Exception('Cannot create plugin with no parent object');
 	}
-
-	/**
-	 * (non-PHPdoc)
-	 * @see DataObject\Factory::delete()
-	 */
-	abstract protected function _delete(DataObject $oModel);
-
-	/**
-	 * (non-PHPdoc)
-	 * @see DataObject\Factory::update()
-	 */
-	abstract protected function _update(DataObject $oModel);
 }

@@ -66,7 +66,7 @@ trait Pluginable
 			$oPlugin->delete();
 		}
 
-		$this->_delete();
+		parent::delete();
 	}
 
 	/**
@@ -80,18 +80,6 @@ trait Pluginable
 			$oPlugin->save();
 		}
 
-		$this->_save();
+		parent::save();
 	}
-
-	/**
-	 * (non-PHPdoc)
-	 * @see DataObject\DataObject::delete()
-	 */
-	abstract protected function _delete();
-
-	/**
-	 * (non-PHPdoc)
-	 * @see DataObject\DataObject::save()
-	 */
-	abstract protected function _save();
 }

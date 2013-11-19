@@ -2,16 +2,14 @@
 
 namespace DataObject;
 
-use Zend\Db\Sql\Select;
-use Zend\Db\Sql\Sql;
-use Zend\Db\Sql\Where;
-
 use Zend\Db\Adapter\Adapter;
 use Zend\Db\Sql\Expression;
 use Zend\Db\Sql\Delete;
 use Zend\Db\Sql\Insert;
+use Zend\Db\Sql\Select;
+use Zend\Db\Sql\Sql;
 use Zend\Db\Sql\Update;
-use Zend\Db\ResultSet\ResultSet;
+use Zend\Db\Sql\Where;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
@@ -31,6 +29,27 @@ abstract class Factory implements ServiceLocatorAwareInterface
 	 * @var Adapter
 	 */
 	static protected $oDb = null;
+
+	/**
+	 * Table name
+	 *
+	 * @var string
+	 */
+	private $sTableName;
+
+	/**
+	 * Table fields names
+	 *
+	 * @var	array
+	 */
+	private $aFields = [];
+
+	/**
+	 * Primary key definition
+	 *
+	 * @var	array
+	 */
+	private $aPrimaryKey = [];
 
 	/**
 	 * Sets DB connection
@@ -63,6 +82,21 @@ abstract class Factory implements ServiceLocatorAwareInterface
 		}
 
 		return self::$oDb;
+	}
+
+	/**
+	 * Data object structure initialisation
+	 *
+	 * @param	string	$sTable		table name
+	 * @param	array	$aPrimary	primary key definition
+	 * @param	array	$aFields	fields definition
+	 * @return	void
+	 */
+	public function __construct($sTable, array $aPrimary, array $aFields)
+	{
+		$this->sTableName	= $sTable;
+		$this->aPrimaryKey	= $aPrimary;
+		$this->aFields		= $aFields;
 	}
 
 // factory method
@@ -210,24 +244,82 @@ abstract class Factory implements ServiceLocatorAwareInterface
 	 * @param	array	$aData	data to save
 	 * @return	mixed
 	 */
-	abstract protected function insert(array &$aData);
+	protected function insert(array &$aData)
+	{
+		$oDb = self::getConnection();
+
+		// przygotowuję zapytanie
+		$oInsert = (new Insert())
+						->into($this->sTableName)
+						->values($aData);
+
+		// uruchamiam zapytanie
+		$oDb->query(
+			(new Sql($oDb))->getSqlStringForSqlObject($oInsert),
+			$oDb::QUERY_MODE_EXECUTE
+		);
+
+		return $oDb->getDriver()->getLastGeneratedValue();
+	}
 
 	/**
 	 * Delete object with given ID
 	 *
-	 * @param	mixed	$mId	primary key value
+	 * @param	DataObject $oModel	DataObject instance to delete
 	 * @throws	\RuntimeException
 	 * @return	void
 	 */
-	abstract public function delete(DataObject $oModel);
+	public function delete(DataObject $oModel)
+	{
+		try
+		{
+			$oDelete = (new Delete($this->sTableName))
+								->where($this->getPrimaryWhere($oModel->getPrimaryField()));
+
+			// wykonuje zapytanie
+			$oDb = Factory::getConnection();
+			$oDb->query(
+				(new Sql($oDb))->getSqlStringForSqlObject($oDelete),
+				$oDb::QUERY_MODE_EXECUTE
+			);
+		}
+		catch(\Exception $e)
+		{
+			throw new Exception('Error while deleting data', null, $e);
+		}
+	}
 
 	/**
 	 * Updates
 	 *
-	 * @param	DataObject $oModel	DataObject to save
+	 * @param	DataObject $oModel	DataObject instance to save
 	 * @return	void
 	 */
-	abstract public function update(DataObject $oModel);
+	public function update(DataObject $oModel)
+	{
+		if(!$oModel->hasModifiedFields())
+		{
+			return;
+		}
+
+		try
+		{
+			$oUpdate = (new Update($this->sTableName))
+								->set($oModel->getModifiedFields())
+								->where($this->getPrimaryWhere($oModel->getPrimaryField()));
+
+			// wykonuje zapytanie
+			$oDb = Factory::getConnection();
+			$oDb->query(
+					(new Sql($oDb))->getSqlStringForSqlObject($oUpdate),
+					$oDb::QUERY_MODE_EXECUTE
+			);
+		}
+		catch(\Exception $e)
+		{
+			throw new Exception('Error while updating data', null, $e);
+		}
+	}
 
 // additional methods
 
@@ -266,21 +358,25 @@ abstract class Factory implements ServiceLocatorAwareInterface
 	abstract protected function createObject(array $aRow, $mOption = null);
 
 	/**
-	 * Returns a Select object
-	 *
-	 * @param	mixed	$mFields	fields to select
-	 * @param	mixed	$mOption	additional options
-	 * @return	\Zend\Db\Sql\Select
-	 */
-	abstract protected function getSelect(array $aFields = ['*'], $mOption = null);
-
-	/**
 	 * Returns a Select object for Paginator Count
 	 *
 	 * @param	mixed	$mOption	additional options
 	 * @return	Zend_Db_Select
 	 */
-	abstract protected function getCountSelect($mOption = null);
+	protected function getCountSelect($mOption = null)
+	{
+		return $this->getSelect(['count' => new Expression('COUNT(*)')], $mOption);
+	}
+
+	/**
+	 * Returns DataObject structure
+	 *
+	 * @return	array
+	 */
+	protected function getFields()
+	{
+		return $this->aFields;
+	}
 
 	/**
 	 * Returns SQL WHERE string created for the specified key fields
@@ -288,5 +384,79 @@ abstract class Factory implements ServiceLocatorAwareInterface
 	 * @param	mixed	$mId	primary key value
 	 * @return	string
 	 */
-	abstract protected function getPrimaryWhere($mId);
+	protected function getPrimaryWhere($mId)
+	{
+		$aPrimaryKey = $this->aPrimaryKey;
+		$oWhere		 = new Where();
+
+		if(count($aPrimaryKey) > 1)
+		{
+			// single primary key
+			if(!isset($mId[0]))
+			{
+				$mId = [$mId];
+			}
+
+			// many fields in key
+			foreach($mId as $aPrimary)
+			{
+				$oWhere2 = new Where();
+
+				foreach($aPrimaryKey as $sField)
+				{
+					if(!isset($aPrimary[$sField]))
+					{
+						throw new Exception('No value for key part: ' . $sField);
+					}
+
+					$sFieldName = $this->sTableName .'.'. $sField;
+
+					if(is_array($aPrimary[$sField]))
+					{
+						$oWhere2->in($sFieldName, $aPrimary[$sField]);
+					}
+					else
+					{
+						$oWhere2->equalTo($sFieldName, $aPrimary[$sField]);
+					}
+				}
+
+				$oWhere->orPredicate($oWhere2);
+			}
+		}
+		else
+		{
+			$sFieldName = $this->sTableName .'.'. $aPrimaryKey[0];
+
+			if(is_array($mId))
+			{
+				$oWhere->in($sFieldName, $mId);
+			}
+			else
+			{
+				$oWhere->equalTo($sFieldName, $mId);
+			}
+		}
+
+		return $oWhere;
+	}
+
+	/**
+	 * Returns a Select object
+	 *
+	 * @param	mixed	$mFields	fields to select
+	 * @param	mixed	$mOption	additional options
+	 * @return	\Zend\Db\Sql\Select
+	 */
+	protected function getSelect(array $aFields = ['*'], $mOption = null)
+	{
+		if($aFields == ['*'])
+		{
+			$aFields = $this->aFields;
+		}
+
+		return (new Select())
+						->from($this->sTableName)
+						->columns($aFields);
+	}
 }

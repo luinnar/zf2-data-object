@@ -11,12 +11,103 @@ namespace DataObject;
 abstract class DataObject
 {
 	/**
+	 * DataObject fields
+	 *
+	 * @var array
+	 */
+	protected $aData;
+
+	/**
+	 * Parent factory
+	 *
+	 * @var Factory
+	 */
+	private $oFactory;
+
+	/**
+	 * Primary Key value
+	 *
+	 * @var mixed
+	 */
+	private $mPrimaryValue;
+
+	/**
+	 * The list of modified fields
+	 *
+	 * @var array
+	 */
+	private $aModifiedFields = [];
+
+	/**
+	 * Is object removed
+	 *
+	 * @var bool
+	 */
+	private $bDeleted = false;
+
+	/**
+	 * Whether the object is modified
+	 *
+	 * @var bool
+	 */
+	private $bModified = false;
+
+	/**
+	 * Constructor, sets necessary data for the data object
+	 * Warning: In child class use this constructor!
+	 *
+	 * @param	array	$aData		model data
+	 * @param	mixed	$mPrimary	primary key value
+	 * @param	Factory	$oFactory	DataObject factory
+	 */
+	public function __construct(array $aData, $mPrimary, Factory $oFactory)
+	{
+		$this->aData		 = $aData;
+		$this->mPrimaryValue = $mPrimary;
+		$this->oFactory		 = $oFactory;
+	}
+
+	/**
+	 * Do not allow serialization of a database object
+	 */
+	public function __sleep()
+	{
+		$aResult = [];
+
+		// analizuję pola klasy i odrzucam pole bazy danych
+		foreach((new \ReflectionClass($this))->getProperties() as $oProperty)
+		{
+			if($oProperty->getName() != 'oFactory')
+			{
+				$aResult[] = $oProperty->getName();
+			}
+		}
+
+		return $aResult;
+	}
+
+	/**
+	 * Loads database object after usnserialize
+	 */
+	public function __wakeup()
+	{
+		$sFactory =	get_class() .'Factory';
+		$this->oFactory = new $sFactory;
+	}
+
+// model manipulation methods
+
+	/**
 	 * Delete object from DB
 	 *
 	 * @throws	Exception
 	 * @return	void
 	 */
-	abstract public function delete();
+	public function delete()
+	{
+		$this->oFactory->delete($this);
+		$this->bDeleted = true;
+	}
 
 	/**
 	 * Save object to DB
@@ -24,21 +115,45 @@ abstract class DataObject
 	 * @throws	Exception
 	 * @return	void
 	 */
-	abstract public function save();
+	public function save()
+	{
+		// is deleted
+		if($this->bDeleted)
+		{
+			throw new Exception('Object is already deleted, you cannot save it.');
+		}
+		// check whether any data has been modified
+		elseif(!$this->hasModifiedFields())
+		{
+			// WARNING RETURN
+			return;
+		}
+
+		$this->oFactory->update($this);
+		$this->clearModified();
+	}
+
+// model information
 
 	/**
-	 * Returns array with modyfied fields
+	 * Returns modyfied fields
 	 *
-	 * @return 	array
+	 * @return	array
 	 */
-	abstract public function getModifiedFields();
+	public function getModifiedFields()
+	{
+		return $this->aModifiedFields;
+	}
 
 	/**
 	 * Returns primary key value
 	 *
 	 * @return	mixed
 	 */
-	abstract public function getPrimaryField();
+	public function getPrimaryField()
+	{
+		return $this->mPrimaryValue;
+	}
 
 	/**
 	 * Returns true, if object was modified
@@ -46,24 +161,21 @@ abstract class DataObject
 	 * @param	string	$sField		optional field name
 	 * @return 	bool
 	 */
-	abstract public function hasModifiedFields($sField = null);
+	public function hasModifiedFields($sField = null)
+	{
+		return isset($sFieldName) ? isset($ths->aModifiedFields[$sField]) : $this->bModified;
+	}
 
 	/**
 	 * Clears information about data modifications
 	 *
 	 * @return	void
 	 */
-	abstract protected function clearModified();
-
-	/**
-	 * Sets structure information
-	 *
-	 * @param	array	$aData		model data
-	 * @param	mixed	$mPrimary	primary key value
-	 * @param	Factory	$oFactory	DataObject factory
-	 * @return	void
-	 */
-	abstract protected function initStructure(array $aData, $mPrimary, Factory $oFactory);
+	protected function clearModified()
+	{
+		$this->aModifiedFields = [];
+		$this->bModified = false;
+	}
 
 	/**
 	 * Set new DB field value
@@ -72,5 +184,10 @@ abstract class DataObject
 	 * @param	string	$mValue		new field value
 	 * @return	void
 	 */
-	abstract protected function setDataValue($sField, $mValue);
+	protected function setDataValue($sField, $mValue)
+	{
+		$this->aData[$sField] = $mValue;
+		$this->aModifiedFields[$sField] = $mValue;
+		$this->bModified = true;
+	}
 }

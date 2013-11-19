@@ -21,7 +21,7 @@ trait Multitable
 	 * @param	array	$aFields	array with field names
 	 * @return	array
 	 */
-	protected function multitablePrefixAdd($sPrefix, &$aFields)
+	protected function multitablePrefixAdd($sPrefix, $aFields)
 	{
 		$aResult = [];
 

@@ -28,22 +28,6 @@ trait Plugin
 	private $_bSaved;
 
 	/**
-	 * Constructor, sets necessary data for the data object
-	 * Warning: In child class use this constructor!
-	 *
-	 * @param	array		$aData		model data
-	 * @param	mixed		$mPrimary	primary key value
-	 * @param	Pluginable	$oOwner		plugin-owner object
-	 * @param	Factory		$oFactory	DataObject factory
-	 */
-	public function __construct(array $aData, $mPrimary, DataObject $oOwner, Factory $oFactory)
-	{
-		$this->initStructure($aData, $mPrimary, $oFactory);
-		$this->oOwner	= $oOwner;
-		$this->_bSaved	= !empty($mPrimary);
-	}
-
-	/**
 	 * Returns owner object
 	 *
 	 * @return	Pluginable
@@ -69,14 +53,26 @@ trait Plugin
 	 */
 	public function save()
 	{
-		$this->_save();
+		parent::save();
 		$this->_bSaved = true;
-		$this->_mPrimaryValue = $this->getOwner()->getPrimaryField();
+// @todo
+//		$this->_mPrimaryValue = $this->getOwner()->getPrimaryField();
 	}
 
 	/**
-	 * (non-PHPdoc)
-	 * @see DataObject\DataObject::save()
+	 * Plugin initialisation
+	 *
+	 * @param	DataObject	$oOwner
+	 * @param	mixed		$mPrimary
 	 */
-	abstract protected function _save();
+	private function initPlugin(DataObject $oOwner, $mPrimary)
+	{
+		if(!empty($this->oOwner))
+		{
+			return;
+		}
+
+		$this->oOwner	= $oOwner;
+		$this->_bSaved	= !empty($mPrimary);
+	}
 }
