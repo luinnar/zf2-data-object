@@ -39,7 +39,7 @@ trait Multitable
 	 * @param	array	$aData	data to format
 	 * @return	array
 	 */
-	protected function multitablePrefixRemove($aData)
+	protected function multitablePrefixRemove($aData, $bNoDefault = false)
 	{
 		$aResult = [];
 		$sDefault = $this->multitableDefaultPrefix();
@@ -50,11 +50,18 @@ trait Multitable
 
 			if($iPos === false)
 			{
-				$aResult[$sDefault][$sField] = $mValue;
+				if($bNoDefault)
+				{
+					$aResult[$sField] = $mValue;
+				}
+				else
+				{
+					$aResult[$sDefault][$sField] = $mValue;
+				}
 			}
 			else
 			{
-				$sTable = substr($sField, 0, $iPos);
+				$sTable = ($bNoDefault ? '_' : '') . substr($sField, 0, $iPos);
 				$sField = substr($sField, $iPos + 1);
 
 				$aResult[$sTable][$sField] = $mValue;

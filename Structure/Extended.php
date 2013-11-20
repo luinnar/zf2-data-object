@@ -2,8 +2,6 @@
 
 namespace DataObject\Structure;
 
-use DataObject\Factory;
-
 /**
  * DataObject structure
  *
@@ -11,44 +9,24 @@ use DataObject\Factory;
  */
 trait Extended
 {
-	use Base {
-		delete as private _delete;
-		save as private _save;
-	}
-
 	/**
-	 * Constructor, sets necessary data for the data object
-	 * Warning: In child class use this constructor!
+	 * Set new DB field value
 	 *
-	 * @param	array	$aData		model data
-	 * @param	mixed	$mPrimary	primary key value
-	 * @param	Factory	$oFactory	DataObject factory
-	 */
-	public function __construct(array $aData, $mPrimary, Factory $oFactory)
-	{
-	}
-
-	/**
-	 * Delete object from DB
-	 *
-	 * @throws	Exception
+	 * @param	string	$sField		DB field name
+	 * @param	string	$mValue		new field value
+	 * @param	string	$sTable		optional table name
 	 * @return	void
 	 */
-	public function delete()
+	protected function setDataValue($sField, $mValue, $sTable = null)
 	{
-
-	}
-
-	/**
-	 * Save object to DB
-	 *
-	 * @throws	Exception
-	 * @return	void
-	 */
-	public function save()
-	{
-		parent::save();
-
-		$this->_save();
+		if(empty($sTable))
+		{
+			parent::setDataValue($sField, $mValue);
+		}
+		else
+		{
+			$this->aData['_'. $sTable][$sField] = $mValue;
+			$this->aModifiedFields['_'. $sTable][$sField] = $mValue;
+		}
 	}
 }

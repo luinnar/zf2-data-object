@@ -18,6 +18,13 @@ abstract class DataObject
 	protected $aData;
 
 	/**
+	 * The list of modified fields
+	 *
+	 * @var array
+	 */
+	protected $aModifiedFields = [];
+
+	/**
 	 * Parent factory
 	 *
 	 * @var Factory
@@ -32,25 +39,11 @@ abstract class DataObject
 	private $mPrimaryValue;
 
 	/**
-	 * The list of modified fields
-	 *
-	 * @var array
-	 */
-	private $aModifiedFields = [];
-
-	/**
 	 * Is object removed
 	 *
 	 * @var bool
 	 */
 	private $bDeleted = false;
-
-	/**
-	 * Whether the object is modified
-	 *
-	 * @var bool
-	 */
-	private $bModified = false;
 
 	/**
 	 * Constructor, sets necessary data for the data object
@@ -158,12 +151,11 @@ abstract class DataObject
 	/**
 	 * Returns true, if object was modified
 	 *
-	 * @param	string	$sField		optional field name
 	 * @return 	bool
 	 */
-	public function hasModifiedFields($sField = null)
+	public function hasModifiedFields()
 	{
-		return isset($sFieldName) ? isset($ths->aModifiedFields[$sField]) : $this->bModified;
+		return !empty($this->aModifiedFields);
 	}
 
 	/**
@@ -174,7 +166,6 @@ abstract class DataObject
 	protected function clearModified()
 	{
 		$this->aModifiedFields = [];
-		$this->bModified = false;
 	}
 
 	/**
@@ -188,6 +179,5 @@ abstract class DataObject
 	{
 		$this->aData[$sField] = $mValue;
 		$this->aModifiedFields[$sField] = $mValue;
-		$this->bModified = true;
 	}
 }

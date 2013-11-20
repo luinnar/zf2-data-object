@@ -90,7 +90,6 @@ abstract class Factory implements ServiceLocatorAwareInterface
 	 * @param	string	$sTable		table name
 	 * @param	array	$aPrimary	primary key definition
 	 * @param	array	$aFields	fields definition
-	 * @return	void
 	 */
 	public function __construct($sTable, array $aPrimary, array $aFields)
 	{
@@ -239,12 +238,43 @@ abstract class Factory implements ServiceLocatorAwareInterface
 // object manipulation methods
 
 	/**
+	 * Delete object with given ID
+	 *
+	 * @param	DataObject $oModel	DataObject instance to delete
+	 * @throws	\RuntimeException
+	 * @return	void
+	 */
+	public function delete(DataObject $oModel)
+	{
+		$this->_delete($oModel->getPrimaryField());
+	}
+
+	/**
+	 * Updates
+	 *
+	 * @param	DataObject $oModel	DataObject instance to save
+	 * @return	void
+	 */
+	public function update(DataObject $oModel)
+	{
+		if(!$oModel->hasModifiedFields())
+		{
+			return;
+		}
+
+		$this->_update(
+			$oModel->getPrimaryField(),
+			$oModel->getModifiedFields()
+		);
+	}
+
+	/**
 	 * Perform SQL insert query and returns last inserted ID
 	 *
 	 * @param	array	$aData	data to save
 	 * @return	mixed
 	 */
-	protected function insert(array &$aData)
+	protected function insert(array $aData)
 	{
 		$oDb = self::getConnection();
 
@@ -263,25 +293,25 @@ abstract class Factory implements ServiceLocatorAwareInterface
 	}
 
 	/**
-	 * Delete object with given ID
+	 * Private delete method
 	 *
-	 * @param	DataObject $oModel	DataObject instance to delete
-	 * @throws	\RuntimeException
+	 * @param	mixed	$mId	primary value
+	 * @throws	Exception
 	 * @return	void
 	 */
-	public function delete(DataObject $oModel)
+	protected function _delete($mId)
 	{
 		try
 		{
 			$oDelete = (new Delete($this->sTableName))
-								->where($this->getPrimaryWhere($oModel->getPrimaryField()));
+								->where($this->getPrimaryWhere($mId));
 
 			// wykonuje zapytanie
 			$oDb = Factory::getConnection();
 			$oDb->query(
-				(new Sql($oDb))->getSqlStringForSqlObject($oDelete),
-				$oDb::QUERY_MODE_EXECUTE
-			);
+					(new Sql($oDb))->getSqlStringForSqlObject($oDelete),
+					$oDb::QUERY_MODE_EXECUTE
+				);
 		}
 		catch(\Exception $e)
 		{
@@ -290,30 +320,27 @@ abstract class Factory implements ServiceLocatorAwareInterface
 	}
 
 	/**
-	 * Updates
+	 * Private update method
 	 *
-	 * @param	DataObject $oModel	DataObject instance to save
+	 * @param	mixed	$mId	primary value
+	 * @param	array	$aData	data to update
+	 * @throws	Exception
 	 * @return	void
 	 */
-	public function update(DataObject $oModel)
+	protected function _update($mId, array $aData)
 	{
-		if(!$oModel->hasModifiedFields())
-		{
-			return;
-		}
-
 		try
 		{
 			$oUpdate = (new Update($this->sTableName))
-								->set($oModel->getModifiedFields())
-								->where($this->getPrimaryWhere($oModel->getPrimaryField()));
+								->set($aData)
+								->where($this->getPrimaryWhere($mId));
 
 			// wykonuje zapytanie
 			$oDb = Factory::getConnection();
 			$oDb->query(
 					(new Sql($oDb))->getSqlStringForSqlObject($oUpdate),
 					$oDb::QUERY_MODE_EXECUTE
-			);
+				);
 		}
 		catch(\Exception $e)
 		{

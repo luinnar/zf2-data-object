@@ -51,7 +51,7 @@ trait PluginableFactory
 				throw new Exception('Plugin "'. $sPluginName .'" doesnt exists in configuration');
 			}
 
-			$this->aCurrentPlugins[$sPluginName] = new self::$aPlugins[$sPluginName];
+			$this->aCurrentPlugins[$sPluginName] = new self::$aPlugins[$sPluginName]($this);
 		}
 	}
 

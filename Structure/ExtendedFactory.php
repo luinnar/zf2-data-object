@@ -2,87 +2,159 @@
 
 namespace DataObject\Structure;
 
-use Zend\Db\Sql\Expression;
+use DataObject\Exception;
+use DataObject\Factory;
+use DataObject\Helper\Multitable;
+use Zend\Db\Sql\Insert;
+use Zend\Db\Sql\Sql;
+use Zend\Db\Sql\Update;
 
 trait ExtendedFactory
 {
-	use BaseFactory {
-		delete as private _delete;
-		insert as private _insert;
-		update as private _update;
+	use Multitable;
+
+	/**
+	 * Table fields names
+	 *
+	 * @var	array
+	 */
+	private $_aFields = [];
+
+	/**
+	 * Base primary key with table name
+	 *
+	 * @var string
+	 */
+	private $_sBasePrimary;
+
+	/**
+	 * Table name
+	 *
+	 * @var string
+	 */
+	private $_sTableName;
+
+	/**
+	 * Primary key name
+	 *
+	 * @var	array
+	 */
+	private $_sPrimaryKey;
+
+	/**
+	 * Data object extended structure initialisation
+	 *
+	 * @param	string	$sTable			table name
+	 * @param	array	$aPrimary		primary key definition
+	 * @param	array	$aFields		fields definition
+	 * @param	string	$sBasePrimary	base primary key (with table name)
+	 * @return	void
+	 */
+	protected function initExtended($sTable, $sPrimary, array $aFields, $sBasePrimary)
+	{
+		$this->_sTableName		= $sTable;
+		$this->_sPrimaryKey		= $sPrimary;
+		$this->_aFields			= $aFields;
+		$this->_sBasePrimary	= $sBasePrimary;
+	}
+
+	/**
+	 * (non-PHPdoc)
+	 * @see DataObject\Factory::getSelect()
+	 */
+	protected function getSelect(array $aFields = ['*'], $mOption = null)
+	{
+		$aCurrFields = null;
+
+		if($aFields == ['*'])
+		{
+			$aCurrFields = $this->multitablePrefixAdd($this->_sTableName, $this->_aFields);
+		}
+
+		$oSelect = parent::getSelect($aFields, $mOption);
+		$oSelect->join(
+			$this->_sTableName,
+			$this->_sBasePrimary .'='. $this->_sTableName .'.'. $this->_sPrimaryKey,
+			$aCurrFields
+		);
+
+		return $oSelect;
 	}
 
 // single object manipulation
 
 	/**
-	 * Perform SQL insert query and returns last inserted ID
-	 *
-	 * @param	array	$aData	data to save
-	 * @return	mixed
+	 * (non-PHPdoc)
+	 * @see DataObject\Factory::insert()
 	 */
-	protected function insert(array &$aData)
+	protected function insert(array $aData)
 	{
-		parent::insert($aData);
+		$aCurrent	= null;
+		$sFieldName	= '_'. $this->_sTableName;
 
-		return $this->_insert($aData);
-	}
-
-	/**
-	 * Delete object with given ID
-	 *
-	 * @param	mixed	$mId	primary key value
-	 * @throws	\RuntimeException
-	 * @return	void
-	 */
-	public function delete($mId)
-	{
-		parent::delete($mId);
-
-		return $this->_delete($mId);
-	}
-
-	/**
-	 * Updates
-	 *
-	 * @param	mixed	$mId	primary key value
-	 * @param	array	$aData
-	 * @return	void
-	 */
-	public function update($mId, array $aData)
-	{
-		parent::update($mId, $aData);
-
-		return $this->_update($mId, $aData);
-	}
-
-// structure methods
-
-	/**
-	 * Prepares fields list for select
-	 *
-	 * @param	array	$aData	array with tables structure
-	 * @return	array
-	 */
-	protected function _doPrepareFields(array &$aData)
-	{
-		$aResult = [];
-
-		foreach($aData as $sTable => &$mFields)
+		if(isset($aData[$sFieldName]))
 		{
-			// Zend\Db\Sql\Expression
-			if($mFields instanceof Expression)
-			{
-				$aResult[$sTable] = $mFields;
-
-				continue;
-			}
-
-			foreach($mFields as $sField)
-			{
-				$aResult[] = $sTable .'.'. $sField .' AS '. $sTable .'-'. $sField;
-			}
+			$aCurrent = $aData[$sFieldName];
+			unset($aData[$sFieldName]);
 		}
 
-		return $aResult;
+		$mPrimaryKey = parent::insert($aData);
+
+		if(!empty($aCurrent))
+		{
+			$oDb = self::getConnection();
+
+			// seting extended primary key
+			$aCurrent[$this->_sPrimaryKey] = $mPrimaryKey;
+			// preparing query
+			$oInsert = (new Insert())
+							->into($this->_sTableName)
+							->values($aCurrent);
+
+			// execute query
+			$oDb->query(
+				(new Sql($oDb))->getSqlStringForSqlObject($oInsert),
+				$oDb::QUERY_MODE_EXECUTE
+			);
+		}
+
+		return $mPrimaryKey;
+	}
+
+	/**
+	 * Protected update method
+	 *
+	 * @param	mixed	$mId	primary value
+	 * @param	array	$aData	data to update
+	 * @throws	Exception
+	 * @return	void
+	 */
+	protected function _update($mId, array $aData)
+	{
+		$sFieldName = '_'. $this->_sTableName;
+
+		if(!empty($aData[$sFieldName]))
+		{
+			try
+			{
+				$oUpdate = (new Update($this->_sTableName))
+									->set($aData[$sFieldName])
+									->where([$this->_sPrimaryKey => $mId]);
+
+				$oDb = Factory::getConnection();
+				$oDb->query(
+						(new Sql($oDb))->getSqlStringForSqlObject($oUpdate),
+						$oDb::QUERY_MODE_EXECUTE
+					);
+			}
+			catch(\Exception $e)
+			{
+				throw new Exception('Error while updating data', null, $e);
+			}
+
+			unset($aData[$sFieldName]);
+		}
+
+		parent::_update($mId, $aData);
 	}
 }
