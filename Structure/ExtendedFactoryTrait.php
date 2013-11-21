@@ -2,16 +2,16 @@
 
 namespace DataObject\Structure;
 
-use DataObject\Exception;
-use DataObject\Factory;
-use DataObject\Helper\Multitable;
-use Zend\Db\Sql\Insert;
-use Zend\Db\Sql\Sql;
-use Zend\Db\Sql\Update;
+use DataObject\Exception,
+	DataObject\Factory,
+	DataObject\Helper\MultitableTrait,
+	Zend\Db\Sql\Insert,
+	Zend\Db\Sql\Sql,
+	Zend\Db\Sql\Update;
 
-trait ExtendedFactory
+trait ExtendedFactoryTrait
 {
-	use Multitable;
+	use MultitableTrait;
 
 	/**
 	 * Table fields names

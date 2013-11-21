@@ -2,8 +2,8 @@
 
 namespace DataObject\Type;
 
-use DataObject\Factory;
-use DataObject\DataObject;
+use DataObject\Factory,
+	DataObject\DataObject;
 
 /**
  * DataObject plugin
@@ -11,7 +11,7 @@ use DataObject\DataObject;
  * @license		New BSD License
  * @author		Mateusz Juściński
  */
-trait Plugin
+trait PluginTrait
 {
 	/**
 	 * Plugin-owner object

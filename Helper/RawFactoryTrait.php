@@ -6,7 +6,7 @@ use \Zend\Db\Sql\Sql,
 	\Zend\Db\Sql\Select,
 	\DataObject\Factory;
 
-trait RawFactory
+trait RawFactoryTrait
 {
 	/**
 	 * Fetch raw database data

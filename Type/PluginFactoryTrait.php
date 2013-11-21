@@ -2,10 +2,10 @@
 
 namespace DataObject\Type;
 
-use DataObject\DataObject;
-use DataObject\Exception;
-use DataObject\Helper\Multitable;
-use Zend\Db\Sql\Select;
+use DataObject\DataObject,
+	DataObject\Exception,
+	DataObject\Helper\MultitableTrait,
+	Zend\Db\Sql\Select;
 
 /**
  * DataObject plugin factory
@@ -13,9 +13,9 @@ use Zend\Db\Sql\Select;
  * @license		New BSD License
  * @author		Mateusz Juściński
  */
-trait PluginFactory
+trait PluginFactoryTrait
 {
-	use Multitable;
+	use MultitableTrait;
 
 	/**
 	 * Adds join to select query

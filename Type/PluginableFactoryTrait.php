@@ -2,9 +2,9 @@
 
 namespace DataObject\Type;
 
-use DataObject\DataObject;
-use DataObject\Exception;
-use DataObject\Helper\Multitable;
+use DataObject\DataObject,
+	DataObject\Exception,
+	DataObject\Helper\MultitableTrait;
 
 /**
  * DataObject factory with plugins
@@ -12,9 +12,9 @@ use DataObject\Helper\Multitable;
  * @license		New BSD License
  * @author		Mateusz Juściński
  */
-trait PluginableFactory
+trait PluginableFactoryTrait
 {
-	use Multitable;
+	use MultitableTrait;
 
 	/**
 	 * Plugins configuration

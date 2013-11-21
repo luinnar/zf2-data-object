@@ -2,7 +2,7 @@
 
 namespace DataObject\Helper;
 
-trait Multitable
+trait MultitableTrait
 {
 	/**
 	 * Returns prefix for fields without aliases

@@ -7,7 +7,7 @@ namespace DataObject\Structure;
  *
  * @author Mateusz Juściński
  */
-trait Extended
+trait ExtendedTrait
 {
 	/**
 	 * Set new DB field value

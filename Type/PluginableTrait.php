@@ -2,8 +2,8 @@
 
 namespace DataObject\Type;
 
-use DataObject\DataObject;
-use DataObject\Exception;
+use DataObject\DataObject,
+	DataObject\Exception;
 
 /**
  * DataObject with plugins
@@ -11,7 +11,7 @@ use DataObject\Exception;
  * @license		New BSD License
  * @author		Mateusz Juściński
  */
-trait Pluginable
+trait PluginableTrait
 {
 	/**
 	 * Loaded plugins
