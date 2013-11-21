@@ -2,9 +2,11 @@
 
 namespace DataObject\Paginator;
 
-use Zend\Db\Sql\Sql;
-use Zend\Db\Sql\Select;
-use Zend\Paginator\Adapter\AdapterInterface;
+use Zend\Db\Sql\Sql,
+	Zend\Db\Sql\Select,
+	Zend\Db\Sql\Where,
+	Zend\Paginator\Adapter\AdapterInterface,
+	DataObject\Factory;
 
 /**
  * Paginator suitable for use in DataObject
