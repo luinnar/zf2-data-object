@@ -35,7 +35,7 @@ trait PluginableFactoryTrait
 	 *
 	 * @param	string|array	$mName	plugin name or array with plugin names
 	 * @throws	Exception
-	 * @return	void
+	 * @return	PluginableFactoryTrait
 	 */
 	public function pluginLoad($mName)
 	{
@@ -53,17 +53,25 @@ trait PluginableFactoryTrait
 
 			$this->aCurrentPlugins[$sPluginName] = new self::$aPlugins[$sPluginName]($this);
 		}
+
+		return $this;
 	}
 
 	/**
-	 * Unloads plugin
+	 * Unloads plugin. If $mName is null then unload all plugins.
 	 *
-	 * @param	string|array	$mName	plugin name or array with names
+	 * @param	string|array|null	$mName	null, plugin name or array with names
 	 * @throws	Exception
-	 * @return	void
+	 * @return	PluginableFactoryTrait
 	 */
-	public function pluginUnload($mName)
+	public function pluginUnload($mName = null)
 	{
+		if(null === $mName)
+		{
+			$this->aCurrentPlugins = [];
+			return $this;
+		}
+
 		if(!is_array($mName))
 		{
 			$mName = [$mName];
@@ -73,6 +81,8 @@ trait PluginableFactoryTrait
 		{
 			unset($this->aCurrentPlugins[$sPluginName]);
 		}
+
+		return $this;
 	}
 
 // DataObject factory methods
