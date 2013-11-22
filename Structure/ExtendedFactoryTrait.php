@@ -58,8 +58,13 @@ trait ExtendedFactoryTrait
 		$this->_aFields		= $aFields;
 
 		// create where statment for join
-		$sBasePrimary		= Factory::getConnection()->getPlatform()->quoteIdentifier($sBasePrimary);
-		$this->_oBaseJoin	= $this->getPrimaryWhere(new Expression($sBasePrimary));
+		$this->_oBaseJoin = $this->getPrimaryWhere(
+								new Expression(
+										Factory::getConnection()
+											->getPlatform()
+											->quoteIdentifierChain(explode('.', $sBasePrimary))
+									)
+							);
 	}
 
 	/**
