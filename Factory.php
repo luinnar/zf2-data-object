@@ -2,16 +2,16 @@
 
 namespace DataObject;
 
-use Zend\Db\Adapter\Adapter;
-use Zend\Db\Sql\Expression;
-use Zend\Db\Sql\Delete;
-use Zend\Db\Sql\Insert;
-use Zend\Db\Sql\Select;
-use Zend\Db\Sql\Sql;
-use Zend\Db\Sql\Update;
-use Zend\Db\Sql\Where;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
+use Zend\Db\Adapter\Adapter,
+	Zend\Db\Sql\Expression,
+	Zend\Db\Sql\Delete,
+	Zend\Db\Sql\Insert,
+	Zend\Db\Sql\Select,
+	Zend\Db\Sql\Sql,
+	Zend\Db\Sql\Update,
+	Zend\Db\Sql\Where,
+	Zend\ServiceManager\ServiceLocatorAwareInterface,
+	Zend\ServiceManager\ServiceLocatorAwareTrait;
 
 /**
  * Abstract class using to create factory for models
@@ -31,6 +31,13 @@ abstract class Factory implements ServiceLocatorAwareInterface
 	static protected $oDb = null;
 
 	/**
+	 * Primary key name
+	 *
+	 * @var string
+	 */
+	private $sPrimaryKey;
+
+	/**
 	 * Table name
 	 *
 	 * @var string
@@ -43,13 +50,6 @@ abstract class Factory implements ServiceLocatorAwareInterface
 	 * @var	array
 	 */
 	private $aFields = [];
-
-	/**
-	 * Primary key definition
-	 *
-	 * @var	array
-	 */
-	private $aPrimaryKey = [];
 
 	/**
 	 * Sets DB connection
@@ -91,10 +91,10 @@ abstract class Factory implements ServiceLocatorAwareInterface
 	 * @param	array	$aPrimary	primary key definition
 	 * @param	array	$aFields	fields definition
 	 */
-	public function __construct($sTable, array $aPrimary, array $aFields)
+	public function __construct($sTable, $sPrimary, array $aFields)
 	{
 		$this->sTableName	= $sTable;
-		$this->aPrimaryKey	= $aPrimary;
+		$this->sPrimaryKey	= $sPrimary;
 		$this->aFields		= $aFields;
 	}
 
@@ -384,6 +384,8 @@ abstract class Factory implements ServiceLocatorAwareInterface
 	 */
 	abstract protected function createObject(array $aRow, $mOption = null);
 
+// SQL helpers methods
+
 	/**
 	 * Returns a Select object for Paginator Count
 	 *
@@ -393,79 +395,6 @@ abstract class Factory implements ServiceLocatorAwareInterface
 	protected function getCountSelect($mOption = null)
 	{
 		return $this->getSelect(['count' => new Expression('COUNT(*)')], $mOption);
-	}
-
-	/**
-	 * Returns DataObject structure
-	 *
-	 * @return	array
-	 */
-	protected function getFields()
-	{
-		return $this->aFields;
-	}
-
-	/**
-	 * Returns SQL WHERE string created for the specified key fields
-	 *
-	 * @param	mixed	$mId	primary key value
-	 * @return	string
-	 */
-	protected function getPrimaryWhere($mId)
-	{
-		$aPrimaryKey = $this->aPrimaryKey;
-		$oWhere		 = new Where();
-
-		if(count($aPrimaryKey) > 1)
-		{
-			// single primary key
-			if(!isset($mId[0]))
-			{
-				$mId = [$mId];
-			}
-
-			// many fields in key
-			foreach($mId as $aPrimary)
-			{
-				$oWhere2 = new Where();
-
-				foreach($aPrimaryKey as $sField)
-				{
-					if(!isset($aPrimary[$sField]))
-					{
-						throw new Exception('No value for key part: ' . $sField);
-					}
-
-					$sFieldName = $this->sTableName .'.'. $sField;
-
-					if(is_array($aPrimary[$sField]))
-					{
-						$oWhere2->in($sFieldName, $aPrimary[$sField]);
-					}
-					else
-					{
-						$oWhere2->equalTo($sFieldName, $aPrimary[$sField]);
-					}
-				}
-
-				$oWhere->orPredicate($oWhere2);
-			}
-		}
-		else
-		{
-			$sFieldName = $this->sTableName .'.'. $aPrimaryKey[0];
-
-			if(is_array($mId))
-			{
-				$oWhere->in($sFieldName, $mId);
-			}
-			else
-			{
-				$oWhere->equalTo($sFieldName, $mId);
-			}
-		}
-
-		return $oWhere;
 	}
 
 	/**
@@ -485,5 +414,61 @@ abstract class Factory implements ServiceLocatorAwareInterface
 		return (new Select())
 						->from($this->sTableName)
 						->columns($aFields);
+	}
+
+	/**
+	 * Returns SQL WHERE string created for the specified key fields
+	 *
+	 * @param	mixed	$mId	primary key value
+	 * @return	Where|string
+	 */
+	protected function getPrimaryWhere($mId)
+	{
+		$oWhere = new Where();
+		$sField = $this->getTableName() .'.'. $this->getTableKey();
+
+		if(is_array($mId))
+		{
+			$oWhere->in($sField, $mId);
+		}
+		else
+		{
+			$oWhere->equalTo($sField, $mId);
+		}
+
+
+		return $oWhere;
+	}
+
+// structure info methods
+
+	/**
+	 * Returns DataObject structure
+	 *
+	 * @return	array
+	 */
+	protected function getTableFields()
+	{
+		return $this->aFields;
+	}
+
+	/**
+	 * Returns primary key name
+	 *
+	 * @return	string
+	 */
+	protected function getTableKey()
+	{
+		return $this->sPrimaryKey;
+	}
+
+	/**
+	 * Returns table name
+	 *
+	 * @return	string
+	 */
+	protected function getTableName()
+	{
+		return $this->sTableName;
 	}
 }

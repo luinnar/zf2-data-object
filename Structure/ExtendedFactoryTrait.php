@@ -5,6 +5,7 @@ namespace DataObject\Structure;
 use DataObject\Exception,
 	DataObject\Factory,
 	DataObject\Helper\MultitableTrait,
+	Zend\Db\Sql\Expression,
 	Zend\Db\Sql\Insert,
 	Zend\Db\Sql\Sql,
 	Zend\Db\Sql\Update;
@@ -21,11 +22,11 @@ trait ExtendedFactoryTrait
 	private $_aFields = [];
 
 	/**
-	 * Base primary key with table name
+	 * Where statement for join
 	 *
-	 * @var string
+	 * @var Zend\Db\Sql\Where
 	 */
-	private $_sBasePrimary;
+	private $_oBaseJoin;
 
 	/**
 	 * Table name
@@ -52,10 +53,13 @@ trait ExtendedFactoryTrait
 	 */
 	protected function initExtended($sTable, $sPrimary, array $aFields, $sBasePrimary)
 	{
-		$this->_sTableName		= $sTable;
-		$this->_sPrimaryKey		= $sPrimary;
-		$this->_aFields			= $aFields;
-		$this->_sBasePrimary	= $sBasePrimary;
+		$this->_sTableName	= $sTable;
+		$this->_sPrimaryKey	= $sPrimary;
+		$this->_aFields		= $aFields;
+
+		// create where statment for join
+		$sBasePrimary		= Factory::getConnection()->getPlatform()->quoteIdentifier($sBasePrimary);
+		$this->_oBaseJoin	= $this->getPrimaryWhere(new Expression($sBasePrimary));
 	}
 
 	/**
@@ -71,14 +75,8 @@ trait ExtendedFactoryTrait
 			$aCurrFields = $this->multitablePrefixAdd($this->_sTableName, $this->_aFields);
 		}
 
-		$oSelect = parent::getSelect($aFields, $mOption);
-		$oSelect->join(
-			$this->_sTableName,
-			$this->_sBasePrimary .'='. $this->_sTableName .'.'. $this->_sPrimaryKey,
-			$aCurrFields
-		);
-
-		return $oSelect;
+		return parent::getSelect($aFields, $mOption)
+							->join($this->_sTableName, $this->_oBaseJoin, $aCurrFields);
 	}
 
 // single object manipulation
@@ -156,5 +154,37 @@ trait ExtendedFactoryTrait
 		}
 
 		parent::_update($mId, $aData);
+	}
+
+// structure info methods
+
+	/**
+	 * Returns DataObject structure
+	 *
+	 * @return	array
+	 */
+	protected function getTableFields()
+	{
+		return $this->_aFields;
+	}
+
+	/**
+	 * Returns primary key name
+	 *
+	 * @return	string
+	 */
+	protected function getTableKey()
+	{
+		return $this->_sPrimaryKey;
+	}
+
+	/**
+	 * Returns table name
+	 *
+	 * @return	string
+	 */
+	protected function getTableName()
+	{
+		return $this->_sTableName;
 	}
 }
