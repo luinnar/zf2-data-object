@@ -58,9 +58,9 @@ trait PluginableFactoryTrait
 	}
 
 	/**
-	 * Unloads plugin
+	 * Unloads plugin. If $mName is null then unload all plugins.
 	 *
-	 * @param	string|array	$mName	plugin name or array with names
+	 * @param	string|array|null	$mName	null, plugin name or array with names
 	 * @throws	Exception
 	 * @return	PluginableFactoryTrait
 	 */
