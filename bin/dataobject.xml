@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project name="dataobject" basedir="./../../">
+	
+	<property name="dataobject.bin" value="${vendor.path}/DataObject/bin" />
 
 	<!-- TASK DEFINITIONS -->
-	<taskdef name="modelgenerate" classname="ModelGenerator" classpath="${deploy.path}/phing/do-generator" />
+	<taskdef name="modelgenerate" classname="ModelGenerator" classpath="${dataobject.bin}/generator" />
 
 	<!-- creates models -->
 	<target name="do.generate">
@@ -15,7 +17,7 @@
 			tableName="${tableName}"
 			dbString="host:${db.host};dbname:${db.name};user:${db.user};pass:${db.pass}"
 			modelPath="${project.basedir}/module"
-			templatePath="${deploy.path}/phing/do-generator/templates" />
+			templatePath="${dataobject.bin}/generator/templates" />
 	</target>
 
 </project>
