@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project name="dataobject" basedir="./../../">
-	
-	<property name="dataobject.bin" value="${deploy.path}/phing" />
 
 	<!-- TASK DEFINITIONS -->
 	<taskdef name="modelgenerate" classname="ModelGenerator" classpath="${deploy.path}/phing/do-generator" />
