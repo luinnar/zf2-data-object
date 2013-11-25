@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project name="dataobject" basedir="./../../">
+<project name="dataobject">
 	
 	<property name="dataobject.bin" value="${vendor.path}/DataObject/bin" />
 
