@@ -1,0 +1,53 @@
+== class
+<?php
+
+namespace ${namespace};
+
+use DataObject\DataObject;
+
+/**
+ * 
+ *
+ * @author 
+ */
+class ${name} extends DataObject
+{${consts}
+// getters
+
+${getters}
+// setters
+
+${setters}}
+
+== constDoc
+
+	/**
+	 *
+	 *
+	 * @var string
+	 */
+== const
+	const ${name} = '${value}';
+== getter
+	/**
+	 * Zwraca 
+	 *
+	 * @return	${type}
+	 */
+	public function ${funcName}()
+	{
+		return $this->aData[${field}];
+	}
+
+== setter
+	/**
+	 * 
+	 *
+	 * @param	${type}	${param}	
+	 * @return	void
+	 */
+	public function ${funcName}(${param})
+	{
+		$this->setDataValue(${dbfield}, ${param});
+	}
+

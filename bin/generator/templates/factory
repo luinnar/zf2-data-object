@@ -1,0 +1,58 @@
+== class
+<?php
+
+namespace ${namespace};
+
+use DataObject\Factory;
+
+/**
+ * 
+ *
+ * @author 
+ */
+class ${class} extends Factory
+{
+${constructor}
+${create}
+${createobject}
+}
+
+== construct
+	/**
+	 * Konstruktor
+	 */
+	public function __construct()
+	{
+		parent::__construct(${table}, ${key}, ${fields});
+	}
+
+== create_base
+	/**
+	 * Tworzy 
+	 *
+${doc}
+	 * @return	${class}
+	 */
+	public function create(${params})
+	{
+		$aData = [
+${dbfields}
+		];
+		$aData[${primary}] = $this->insert($aData);
+	
+		return $this->createObject($aData);
+	}
+	
+== create_field_doc
+	 * @param	${type}	${param}	
+== create_field
+			${dbfield} => ${param}, 
+== createobject
+	/**
+	 * (non-PHPdoc)
+	 * @see Core_DataObject_Factory::createObject()
+	 */
+	protected function createObject(array $aRow, $mOption = null)
+	{
+		return new ${class}($aRow, $aRow[${primary}], $this);
+	}

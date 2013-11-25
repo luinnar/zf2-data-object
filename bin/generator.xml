@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="dataobject" basedir="./../../">
+
+	<!-- TASK DEFINITIONS -->
+	<taskdef name="modelgenerate" classname="ModelGenerator" classpath="${deploy.path}/dataobject/generator" />
+
+	<!-- creates models -->
+	<target name="do.generate">
+		<input propertyname="tableName">Table name:</input>
+		<input propertyname="className">Model name (with namespace):</input>
+	
+		<modelgenerate
+			className="${className}"
+			tableName="${tableName}"
+			dbString="host:${db.host};dbname:${db.name};user:${db.user};pass:${db.pass}"
+			modelPath="${deploy.path}/../module"
+			templatePath="${deploy.path}/dataobject/generator/templates" />
+	</target>
+
+</project>
