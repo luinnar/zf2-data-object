@@ -2,10 +2,10 @@
 
 <project name="dataobject" basedir="./../../">
 	
-	<property name="dataobject.bin" value="${vendor.path}/DataObject/bin" />
+	<property name="dataobject.bin" value="${deploy.path}/phing" />
 
 	<!-- TASK DEFINITIONS -->
-	<taskdef name="modelgenerate" classname="ModelGenerator" classpath="${dataobject.bin}/generator" />
+	<taskdef name="modelgenerate" classname="ModelGenerator" classpath="${deploy.path}/phing/do-generator" />
 
 	<!-- creates models -->
 	<target name="do.generate">
@@ -16,8 +16,8 @@
 			className="${className}"
 			tableName="${tableName}"
 			dbString="host:${db.host};dbname:${db.name};user:${db.user};pass:${db.pass}"
-			modelPath="${deploy.path}/../module"
-			templatePath="${dataobject.bin}/generator/templates" />
+			modelPath="${project.basedir}/module"
+			templatePath="${deploy.path}/phing/do-generator/templates" />
 	</target>
 
 </project>
