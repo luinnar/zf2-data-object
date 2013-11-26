@@ -2,14 +2,14 @@
 
 namespace DataObject\Type;
 
-use DataObject\DataObject;
+use DataObject\Factory;
 
 /**
  * Base factory for models with translations
  *
  * @author Mateusz Juściński
  */
-abstract class LanguageFactory extends DataObject
+abstract class LanguageFactory extends Factory
 {
 	/**
 	 * Global locale

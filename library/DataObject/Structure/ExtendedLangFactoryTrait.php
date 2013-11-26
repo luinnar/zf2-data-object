@@ -4,7 +4,8 @@ namespace DataObject\Structure;
 
 use DataObject\Exception,
 	DataObject\Factory,
-	Zend\Db\Sql\Update;
+	Zend\Db\Sql\Update,
+	Zend\Db\Sql\Where;
 
 /**
  * Extended structure for language factories
@@ -45,11 +46,17 @@ trait ExtendedLangFactoryTrait
 			$aCurrFields = $this->multitablePrefixAdd($this->_sTableName, $this->_aFields);
 		}
 
-		$sJoin	= $this->_sBasePrimary .'='. $this->_sTableName .'.'. $this->_sPrimaryKey;
-		$sJoin .= ' AND '. $this->_sTableName .'.locale = '. $this->getLocale();
+		$oJoinWhere = (new Where)
+			->equalTo(
+				$this->_sBasePrimary, 	$this->_sTableName .'.'. $this->_sPrimaryKey,
+				Where::TYPE_IDENTIFIER, Where::TYPE_IDENTIFIER
+			)
+			->and->equalTo(
+				$this->_sTableName .'.locale', $this->getLocale()
+			);
 
 		$oSelect = parent::getSelect($aFields, $mOption);
-		$oSelect->join($this->_sTableName, $sJoin, $aCurrFields);
+		$oSelect->join($this->_sTableName, $oJoinWhere, $aCurrFields);
 
 		return $oSelect;
 	}
