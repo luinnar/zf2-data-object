@@ -29,13 +29,6 @@ trait ExtendedFactoryTrait
 	private $_oBaseJoin;
 
 	/**
-	 * Base primary key (with table name)
-	 *
-	 * @var	array
-	 */
-	private $_sBasePrimary;
-
-	/**
 	 * Table name
 	 *
 	 * @var string
@@ -63,7 +56,6 @@ trait ExtendedFactoryTrait
 		$this->_sTableName	= $sTable;
 		$this->_sPrimaryKey	= $sPrimary;
 		$this->_aFields		= $aFields;
-		$this->_sBasePrimary = $sBasePrimary;
 
 		// create where statment for join
 		$this->_oBaseJoin = $this->getPrimaryWhere(

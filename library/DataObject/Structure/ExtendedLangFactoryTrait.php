@@ -14,7 +14,9 @@ use DataObject\Exception,
  */
 trait ExtendedLangFactoryTrait
 {
-	use ExtendedFactoryTrait;
+	use ExtendedFactoryTrait {
+		initExtended as private _initExtended;
+	}
 
 	/**
 	 * (non-PHPdoc)
@@ -30,35 +32,21 @@ trait ExtendedLangFactoryTrait
 
 	/**
 	 * (non-PHPdoc)
-	 * @see DataObject\Factory::getSelect()
+	 * @see ExtendedLangFactoryTrait::initExtended()
 	 */
-	protected function getSelect(array $aFields = ['*'], $mOption = null)
+	protected function initExtended($sTable, $sPrimary, array $aFields, $sBasePrimary)
 	{
-		if(!$this->isLocaleSet())
-		{
-			throw new Exception('Language is not set');
-		}
+		$this->_initExtended($sTable, $sPrimary, $aFields, $sBasePrimary);
 
-		$aCurrFields = null;
-
-		if($aFields == ['*'])
-		{
-			$aCurrFields = $this->multitablePrefixAdd($this->_sTableName, $this->_aFields);
-		}
-
-		$oJoinWhere = (new Where)
-			->equalTo(
-				$this->_sBasePrimary, 	$this->_sTableName .'.'. $this->_sPrimaryKey,
-				Where::TYPE_IDENTIFIER, Where::TYPE_IDENTIFIER
-			)
-			->and->equalTo(
-				$this->_sTableName .'.locale', $this->getLocale()
-			);
-
-		$oSelect = parent::getSelect($aFields, $mOption);
-		$oSelect->join($this->_sTableName, $oJoinWhere, $aCurrFields);
-
-		return $oSelect;
+		// create where statment for join
+		$this->_oBaseJoin = (new Where)
+								->equalTo(
+									$sBasePrimary, 	$sTable .'.'. $sPrimary,
+									Where::TYPE_IDENTIFIER, Where::TYPE_IDENTIFIER
+								)
+								->and->equalTo(
+									$sTable .'.locale', $this->getLocale()
+								);
 	}
 
 	/**
