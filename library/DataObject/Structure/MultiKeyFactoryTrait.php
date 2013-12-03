@@ -4,7 +4,7 @@ namespace DataObject\Structure;
 
 use Zend\Db\Sql\Where;
 
-class MultiKeyFactoryTrait
+trait MultiKeyFactoryTrait
 {
 	/**
 	 * Returns SQL WHERE string created for the specified key fields
