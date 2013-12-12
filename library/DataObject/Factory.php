@@ -320,6 +320,22 @@ abstract class Factory implements ServiceLocatorAwareInterface
 	}
 
 	/**
+	 * Perform SQL select and returns response object
+	 *
+	 * @param	Select	$oSelect	select definition
+	 * @return	\Zend\Db\ResultSet\ResultSet
+	 */
+	protected function _select(Select $oSelect)
+	{
+		$oDb = self::getConnection();
+
+		return $oDb->query(
+				(new Sql($oDb))->getSqlStringForSqlObject($oSelect),
+				$oDb::QUERY_MODE_EXECUTE
+		);
+	}
+
+	/**
 	 * Private update method
 	 *
 	 * @param	mixed	$mId	primary value
@@ -355,21 +371,15 @@ abstract class Factory implements ServiceLocatorAwareInterface
 	 *
 	 * @param	Select	$aDbResult	Zend/Db/Sql/Select object
 	 * @param	mixed	$mOption	aditional options
-	 * @return array
+	 * @return	array
 	 */
 	protected function createList(Select $oSelect, $mOption = null)
 	{
-		$oDb	= self::getConnection();
-		$oDbRes = $oDb->query(
-					(new Sql($oDb))->getSqlStringForSqlObject($oSelect),
-					$oDb::QUERY_MODE_EXECUTE
-				);
-
 		$aResult = array();
 
-		foreach($oDbRes as $aRow)
+		foreach($this->_select($oSelect) as $oRow)
 		{
-			$aResult[] = $this->createObject($aRow->getArrayCopy(), $mOption);
+			$aResult[] = $this->createObject($oRow->getArrayCopy(), $mOption);
 		}
 
 		return $aResult;
