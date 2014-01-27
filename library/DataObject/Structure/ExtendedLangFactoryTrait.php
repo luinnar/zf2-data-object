@@ -4,6 +4,7 @@ namespace DataObject\Structure;
 
 use DataObject\Exception,
 	DataObject\Factory,
+	Zend\Db\Sql\Sql,
 	Zend\Db\Sql\Update,
 	Zend\Db\Sql\Where;
 

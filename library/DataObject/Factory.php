@@ -435,7 +435,7 @@ abstract class Factory implements ServiceLocatorAwareInterface
 	protected function getPrimaryWhere($mId)
 	{
 		$oWhere = new Where();
-		$sField = $this->getTableName() .'.'. $this->getTableKey();
+		$sField = $this->sTableName .'.'. $this->sPrimaryKey;
 
 		if(is_array($mId))
 		{
