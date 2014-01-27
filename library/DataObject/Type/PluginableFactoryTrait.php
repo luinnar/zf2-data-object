@@ -116,6 +116,13 @@ trait PluginableFactoryTrait
 	{
 		foreach($aData as $sPlugin => $aFields)
 		{
+			$sPlugin = ltrim($sPlugin, '_');
+
+			if(!isset(self::$aPlugins[$sPlugin]))
+			{
+				continue;
+			}
+
 			if(empty($this->aCurrentPlugins[$sPlugin]))
 			{
 				throw new Exception('Plugin "'. $sPlugin .'" is not loaded');

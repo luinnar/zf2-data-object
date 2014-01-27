@@ -73,7 +73,7 @@ trait ExtendedFactoryTrait
 	 */
 	protected function getSelect(array $aFields = ['*'], $mOption = null)
 	{
-		$aCurrFields = null;
+		$aCurrFields = [];
 
 		if($aFields == ['*'])
 		{
