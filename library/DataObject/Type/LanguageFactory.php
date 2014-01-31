@@ -75,10 +75,11 @@ abstract class LanguageFactory extends Factory
 	 * Sets local language
 	 *
 	 * @param	string	$sLocale	locale code
-	 * @return	void
+	 * @return	LanguageFactory
 	 */
 	public function setLocale($sLocale)
 	{
 		$this->sLocale = $sLocale;
+		return $this;
 	}
 }

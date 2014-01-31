@@ -16,8 +16,22 @@ use DataObject\Exception,
 trait ExtendedLangFactoryTrait
 {
 	use ExtendedFactoryTrait {
-		initExtended as private _initExtended;
+		getBaseJoin as private _getBaseJoin;
 	}
+
+	/**
+	 * Base join where with lang
+	 *
+	 * @var	Zend\Db\Sql\Where
+	 */
+	private $_oJoinWhere;
+
+	/**
+	 * Language used in BaseJoin
+	 *
+	 * @var	string
+	 */
+	private $_sJoinLang = null;
 
 	/**
 	 * (non-PHPdoc)
@@ -33,21 +47,21 @@ trait ExtendedLangFactoryTrait
 
 	/**
 	 * (non-PHPdoc)
-	 * @see ExtendedLangFactoryTrait::initExtended()
+	 * @see DataObject\Structure\ExtendedFactoryTrait::getBaseJoin()
 	 */
-	protected function initExtended($sTable, $sPrimary, array $aFields, $sBasePrimary)
+	protected function getBaseJoin()
 	{
-		$this->_initExtended($sTable, $sPrimary, $aFields, $sBasePrimary);
+		if($this->_sJoinLang != $this->getLocale())
+		{
+			$this->_sJoinLang = $this->getLocale();
 
-		// create where statment for join
-		$this->_oBaseJoin = (new Where)
-								->equalTo(
-									$sBasePrimary, 	$sTable .'.'. $sPrimary,
-									Where::TYPE_IDENTIFIER, Where::TYPE_IDENTIFIER
-								)
-								->and->equalTo(
-									$sTable .'.locale', $this->getLocale()
-								);
+			$this->_oJoinWhere = clone $this->_getBaseJoin();
+			$this->_oJoinWhere->and->equalTo(
+				$this->_sTableName .'.locale', $this->_sJoinLang
+			);
+		}
+
+		return $this->_oJoinWhere;
 	}
 
 	/**

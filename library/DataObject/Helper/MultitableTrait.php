@@ -9,7 +9,7 @@ trait MultitableTrait
 	 *
 	 * @return	string
 	 */
-	final protected function multitableDefaultPrefix()
+	protected function multitableDefaultPrefix()
 	{
 		return '_default';
 	}
