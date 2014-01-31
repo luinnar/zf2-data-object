@@ -53,10 +53,11 @@ trait ExtendedLangFactoryTrait
 	{
 		if($this->_sJoinLang != $this->getLocale())
 		{
+			$this->_sJoinLang = $this->getLocale();
 
 			$this->_oJoinWhere = clone $this->_getBaseJoin();
 			$this->_oJoinWhere->and->equalTo(
-				$this->_sTableName .'.locale', $this->getLocale()
+				$this->_sTableName .'.locale', $this->_sJoinLang
 			);
 		}
 
