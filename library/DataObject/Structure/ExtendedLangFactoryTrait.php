@@ -20,6 +20,13 @@ trait ExtendedLangFactoryTrait
 	}
 
 	/**
+	 * Base join predicate - to this join we will add locale predicate
+	 *
+	 * @var	\Zend\Db\Sql\Where
+	 */
+	private $_oBaseJoinPrepare;
+
+	/**
 	 * (non-PHPdoc)
 	 * @see DataObject\Type\LanguageFactory::getLocale()
 	 */
@@ -40,14 +47,27 @@ trait ExtendedLangFactoryTrait
 		$this->_initExtended($sTable, $sPrimary, $aFields, $sBasePrimary);
 
 		// create where statment for join
-		$this->_oBaseJoin = (new Where)
+		$this->_oBaseJoinPrepare = (new Where)
 								->equalTo(
 									$sBasePrimary, 	$sTable .'.'. $sPrimary,
 									Where::TYPE_IDENTIFIER, Where::TYPE_IDENTIFIER
-								)
-								->and->equalTo(
-									$sTable .'.locale', $this->getLocale()
 								);
+
+		$this->afterLocaleChange();
+	}
+
+	/**
+	 * (non-PHPdoc)
+	 * @see ELanguageFactory::afterLocaleChange()
+	 */
+	protected function afterLocaleChange()
+	{
+		$oWhere = clone $this->_oBaseJoinPrepare;
+		$oWhere->and->equalTo(
+					$this->_sTableName .'.locale', $this->getLocale()
+				);
+
+		$this->_oBaseJoin = $oWhere;
 	}
 
 	/**
