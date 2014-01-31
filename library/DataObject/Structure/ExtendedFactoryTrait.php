@@ -48,10 +48,9 @@ trait ExtendedFactoryTrait
 	 * @param	string	$sTable			table name
 	 * @param	array	$aPrimary		primary key definition
 	 * @param	array	$aFields		fields definition
-	 * @param	string	$sBasePrimary	base primary key (with table name)
 	 * @return	void
 	 */
-	protected function initExtended($sTable, $sPrimary, array $aFields, $sBasePrimary)
+	protected function initExtended($sTable, $sPrimary, array $aFields)
 	{
 		$this->_sTableName	= $sTable;
 		$this->_sPrimaryKey	= $sPrimary;
@@ -62,7 +61,7 @@ trait ExtendedFactoryTrait
 								new Expression(
 										Factory::getConnection()
 											->getPlatform()
-											->quoteIdentifierChain(explode('.', $sBasePrimary))
+											->quoteIdentifierChain([$sTable, $sPrimary])
 									)
 							);
 	}
@@ -81,7 +80,7 @@ trait ExtendedFactoryTrait
 		}
 
 		return parent::getSelect($aFields, $mOption)
-							->join($this->_sTableName, $this->_oBaseJoin, $aCurrFields);
+							->join($this->_sTableName, $this->getBaseJoin(), $aCurrFields);
 	}
 
 // single object manipulation
@@ -191,5 +190,17 @@ trait ExtendedFactoryTrait
 	protected function getTableName()
 	{
 		return $this->_sTableName;
+	}
+
+// private
+
+	/**
+	 * Return where for join
+	 *
+	 * @return	Zend\Db\Sql\Where
+	 */
+	private function getBaseJoin()
+	{
+		return $this->_oBaseJoin;
 	}
 }
