@@ -345,6 +345,11 @@ abstract class Factory implements ServiceLocatorAwareInterface
 	 */
 	protected function _update($mId, array $aData)
 	{
+		if(empty($aData))
+		{
+			return;
+		}
+
 		try
 		{
 			$oUpdate = (new Update($this->sTableName))
