@@ -3,9 +3,11 @@
 require_once 'phing/Task.php';
 require_once 'Model.php';
 require_once 'Factory.php';
+require_once 'Test.php';
 
 use DataObject\Generator\Model;
 use DataObject\Generator\Factory;
+use DataObject\Generator\Test;
 
 /**
  * Task generates source code of DataObject models

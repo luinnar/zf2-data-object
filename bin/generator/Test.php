@@ -141,19 +141,19 @@ class Test extends AbstractGenerator
 			switch($aOptions['type'])
 			{
 				case self::TYPE_DATE:
-					$mValue = date('Y-m-d', time() - rand(1, 20) * 86400);
+					$mValue = "'". date('Y-m-d', time() - rand(1, 20) * 86400) ."'";
 					break;
 				case self::TYPE_DATETIME:
-					$mValue = date('Y-m-d H:i:s', time() - rand(1, 20) * 86400);
+					$mValue = "'". date('Y-m-d H:i:s', time() - rand(1, 20) * 86400) ."'";
 					break;
 				case self::TYPE_TIME:
-					$mValue = date('H:i:s', time() - rand(1, 20) * 60);
+					$mValue = "'". date('H:i:s', time() - rand(1, 20) * 60) ."'";
 					break;
 				case self::TYPE_INT:
 					$mValue = rand(1, 1000);
 					break;
 				case self::TYPE_STRING:
-					$mValue = '"test'. rand(1, 1000) .'"';
+					$mValue = "'test". rand(1, 1000) ."'";
 					break;
 				case self::TYPE_ENUM:
 					$mValue = array_rand($aOptions['const']);
@@ -171,7 +171,7 @@ class Test extends AbstractGenerator
 	protected function save($sClassName, $sCode)
 	{
 		$sModule = substr($sClassName, 0, strpos($sClassName, '\\'));
-		$sPath	 = $this->sModelsPath .'/../tests/'. str_replace('\\', '/', $sClassName) .'.php';
+		$sPath	 = $this->sModelsPath .'/../tests/'. str_replace('\\', '/', $sClassName) .'Test.php';
 
 		// override check
 		if(file_exists($sPath))
