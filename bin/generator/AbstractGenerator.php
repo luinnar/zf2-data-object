@@ -14,9 +14,12 @@ abstract class AbstractGenerator
 	 *
 	 * @var string
 	 */
+	const TYPE_DATE		= 'date';
+	const TYPE_DATETIME	= 'datetime';
 	const TYPE_ENUM		= 'enum';
 	const TYPE_INT		= 'int';
 	const TYPE_STRING	= 'string';
+	const TYPE_TIME		= 'time';
 
 	/**
 	 * Array with information about table fields
@@ -139,10 +142,22 @@ abstract class AbstractGenerator
 			$aResult['type']	= self::TYPE_STRING;
 			$aResult['prefix']	= 's';
 		}
-		elseif(strpos($sType, 'date') !== false || strpos($sType, 'time') !== false)
+		elseif($sType == 'date')
 		{
 			$aResult['docType'] = 'string';
-			$aResult['type']	= self::TYPE_STRING;
+			$aResult['type']	= self::TYPE_DATE;
+			$aResult['prefix']	= 's';
+		}
+		elseif($sType == 'datetime')
+		{
+			$aResult['docType'] = 'string';
+			$aResult['type']	= self::TYPE_DATETIME;
+			$aResult['prefix']	= 's';
+		}
+		elseif($sType == 'time')
+		{
+			$aResult['docType'] = 'string';
+			$aResult['type']	= self::TYPE_TIME;
 			$aResult['prefix']	= 's';
 		}
 		elseif($sType == 'enum')

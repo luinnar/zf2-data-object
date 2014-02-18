@@ -62,10 +62,12 @@ class ModelGenerator extends Task
 			// generates model class
 			$oGenerator = new Model($this->oDb, $this->sModelPath, $this->sTemplatePath);
 			$oGenerator->generate($this->sTableName, $this->sClassName);
-
 			// generates factory class
 			$oGenerator = new Factory($this->oDb, $this->sModelPath, $this->sTemplatePath);
 			$oGenerator->generate($this->sTableName, $this->sClassName .'Factory');
+			// generates tests
+			$oGenerator = new Test($this->oDb, $this->sModelPath, $this->sTemplatePath);
+			$oGenerator->generate($this->sTableName, $this->sClassName);
 		}
 		catch(Exception $e)
 		{

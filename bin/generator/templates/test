@@ -1,0 +1,82 @@
+== file
+<?php
+
+use ${class_fullname};
+
+/**
+ * 
+ *
+ * @author	
+ */
+class ${class_name}Test extends \PT\Test\TestCase
+{
+	/**
+	 * 
+	 *
+	 * @var	${factory_fullname}
+	 */
+	protected static $oFactory;
+
+	/**
+	 * Przygotowanie testu
+	 */
+	public static function setUpBeforeClass()
+	{
+		self::clearDatabase(['${table_name}']);
+		self::$oFactory = new ${factory_fullname};
+	}
+
+${test_create}${test_edit}${test_delete}}
+
+== test_create
+	/**
+	 * Test tworzenia kategorii
+	 */
+	public function testCreate()
+	{
+		$oModel = self::$oFactory->create(${create_list});
+		// fields check
+${fields_check}
+		// 
+		$oModel = self::$oFactory->getOne($oModel->getId());
+		// fields check
+${fields_check}
+		return $oModel;
+	}
+
+== test_edit
+	/**
+	 * Edit test
+	 *
+	 * @depends testCreate
+	 */
+	public function testEdit(${class_name} $oModel)
+	{
+${fields_set}
+		$oModel->save();
+		// fields check
+${fields_check}
+		// pobranie z bazy danych
+		$oModel = self::$oFactory->getOne($oModel->getId());
+		// fields check
+${fields_check}
+		return $oModel;
+	}
+
+== test_delete
+	/**
+	 * Delete test
+	 *
+	 * @expectedException	\DataObject\Exception
+	 * @depends testEdit
+	 */
+	public function testDelete(${class_name} $oModel)
+	{
+		$oModel->delete();
+		self::$oFactory->getOne($oModel->getId());
+	}
+
+== field_check
+		$this->assertEquals(${value}, $oModel->get${method}());
+== field_set
+		$oModel->set${method}(${value});
