@@ -34,7 +34,7 @@ class Model extends AbstractGenerator
 						'name'			=> $sClassName,
 						'consts'		=> $this->generateConsts(),
 						'getters'		=> $this->generateGetters(),
-						'setters'		=> $this->generateSetters()
+						'setters'		=> $this->generateSetters($sClassName)
 					]
 				);
 
@@ -94,9 +94,10 @@ class Model extends AbstractGenerator
 	/**
 	 * Generates setter methods
 	 *
+	 * @param	string	$sClassName		class name
 	 * @return	string
 	 */
-	protected function generateSetters()
+	protected function generateSetters($sClassName)
 	{
 		$sSetters = '';
 
@@ -111,6 +112,7 @@ class Model extends AbstractGenerator
 			$sSetters .= $this->fillFields(
 							'setter',
 							[
+								'className'	=> $sClassName,
 								'type'		=> $aOptions['docType'],
 								'param'		=> '$'. $aOptions['prefix'] . $aOptions['name'],
 								'funcName'	=> 'set'. $aOptions['name'],

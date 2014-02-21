@@ -31,6 +31,47 @@ trait PluginableFactoryTrait
 	private $aCurrentPlugins = [];
 
 	/**
+	 * Returns plugin for given owner instance
+	 *
+	 * @param	string		$sPlugin	plugin name
+	 * @param	DataObject	$oModel		owner model instance
+	 * @return	DataObject
+	 */
+	public function pluginGet($sPlugin, DataObject $oModel)
+	{
+		$sPlugin = ltrim($sPlugin, '_');
+		$bLoaded = $this->pluginIsLoaded($sPlugin);
+
+		// loads missing plugin
+		if(!$bLoaded)
+		{
+			$this->pluginLoad($sPlugin);
+		}
+
+		$oFactory	= $this->aCurrentPlugins[$sPlugin];
+		$oPlugin	= $oFactory->getPluginByOwner($oModel);
+
+		// uloads plugin to preserve plugin state
+		if(!$bLoaded)
+		{
+			$this->pluginUnload($sPlugin);
+		}
+
+		return $oPlugin;
+	}
+
+	/**
+	 * Is plugin loaded?
+	 *
+	 * @param	string	$sName	plugin name
+	 * @return	bool
+	 */
+	public function pluginIsLoaded($sName)
+	{
+		return !empty($this->aCurrentPlugins[$sName]);
+	}
+
+	/**
 	 * Loads plugin
 	 *
 	 * @param	string|array	$mName	plugin name or array with plugin names

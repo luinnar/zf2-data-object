@@ -180,4 +180,16 @@ abstract class DataObject
 		$this->aData[$sField] = $mValue;
 		$this->aModifiedFields[$sField] = $mValue;
 	}
+
+// additional
+
+	/**
+	 * Returns factory instance
+	 *
+	 * @return	Factory
+	 */
+	protected function getFactory()
+	{
+		return $this->oFactory;
+	}
 }

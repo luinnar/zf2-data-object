@@ -44,10 +44,12 @@ ${setters}}
 	 * 
 	 *
 	 * @param	${type}	${param}	
-	 * @return	void
+	 * @return	${className}
 	 */
 	public function ${funcName}(${param})
 	{
 		$this->setDataValue(${dbfield}, ${param});
+		
+		return $this;
 	}
 

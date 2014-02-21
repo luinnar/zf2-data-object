@@ -35,6 +35,18 @@ trait PluginFactoryTrait
 	abstract public function getPluginObject(array $aData, DataObject $oOwner);
 
 	/**
+	 * Create single plugin for owner object
+	 *
+	 * @param	DataObject	$oOwner		owner instance
+	 * @throws	Exception
+	 * @return	DataObject
+	 */
+	public function getPluginByOwner(DataObject $oOwner)
+	{
+		throw new Exception('Unsupported');
+	}
+
+	/**
 	 * (non-PHPdoc)
 	 * @see DataObject\Factory::delete()
 	 */

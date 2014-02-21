@@ -23,12 +23,21 @@ trait PluginableTrait
 	/**
 	 * Return loaded plugin
 	 *
-	 * @param	string	$sName	plugin name
+	 * @param	string	$sName			plugin name
+	 * @param	bool	$bForceLoad		forces plugin load
 	 * @throws	Exception
 	 * @return	Plugin
 	 */
-	public function getPlugin($sName)
+	public function getPlugin($sName, $bForceLoad = false)
 	{
+		if($bForceLoad)
+		{
+			$this->loadPlugin(
+				$this->getFactory()->pluginGet($sName, $this),
+				$sName
+			);
+		}
+
 		if(!isset($this->_aPlugins[$sName]))
 		{
 			throw new Exception('Plugin "'. $sName .'" is not loaded');
