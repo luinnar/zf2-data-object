@@ -135,7 +135,7 @@ abstract class Factory implements ServiceLocatorAwareInterface
 	 */
 	public function getFromWhere($mWhere, array $aOrder = array(), $mOption = null)
 	{
-		$oSelect = $this->getSelect(['*'], $mOption)->where($oWhere);
+		$oSelect = $this->getSelect(['*'], $mOption)->where($mWhere);
 
 		if(!empty($aOrder))
 		{
