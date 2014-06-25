@@ -179,6 +179,8 @@ abstract class DataObject
 	{
 		$this->aData[$sField] = $mValue;
 		$this->aModifiedFields[$sField] = $mValue;
+
+		return $this;
 	}
 
 // additional

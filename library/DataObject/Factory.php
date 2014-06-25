@@ -129,11 +129,11 @@ abstract class Factory implements ServiceLocatorAwareInterface
 	/**
 	 * Returns an array of object that matches the given condition
 	 *
-	 * @param	Zend/Db/Sql/Where	$mWhere		where object
-	 * @param	array				$aOrder		array with ordering options
-	 * @param	mixed				$mOption	additional options
+	 * @param	Zend/Db/Sql/Where|array	$mWhere		where statement
+	 * @param	array					$aOrder		array with ordering options
+	 * @param	mixed					$mOption	additional options
 	 */
-	public function getFromWhere(Where $oWhere, array $aOrder = array(), $mOption = null)
+	public function getFromWhere($mWhere, array $aOrder = array(), $mOption = null)
 	{
 		$oSelect = $this->getSelect(['*'], $mOption)->where($oWhere);
 
@@ -400,6 +400,23 @@ abstract class Factory implements ServiceLocatorAwareInterface
 	abstract protected function createObject(array $aRow, $mOption = null);
 
 // SQL helpers methods
+
+	/**
+	 * Executes given query
+	 *
+	 * @param	\Zend\Db\Sql\SqlInterface	$oQuery		query object
+	 * @return	\Zend\Db\ResultSet\Zend\Db\ResultSet
+	 */
+	protected function executeQuery(\Zend\Db\Sql\SqlInterface $oQuery)
+	{
+		// wykonuje zapytanie
+		$oDb = self::getConnection();
+
+		return $oDb->query(
+					(new Sql($oDb))->getSqlStringForSqlObject($oUpdate),
+					$oDb::QUERY_MODE_EXECUTE
+				);
+	}
 
 	/**
 	 * Returns a Select object for Paginator Count
