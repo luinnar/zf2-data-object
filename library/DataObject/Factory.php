@@ -413,7 +413,7 @@ abstract class Factory implements ServiceLocatorAwareInterface
 		$oDb = self::getConnection();
 
 		return $oDb->query(
-					(new Sql($oDb))->getSqlStringForSqlObject($oUpdate),
+					(new Sql($oDb))->getSqlStringForSqlObject($oQuery),
 					$oDb::QUERY_MODE_EXECUTE
 				);
 	}

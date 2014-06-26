@@ -50,7 +50,7 @@ trait ExtendedFactoryTrait
 	 * @param	array	$aFields		fields definition
 	 * @return	void
 	 */
-	protected function initExtended($sTable, $sPrimary, array $aFields)
+	private function initExtended($sTable, $sPrimary, array $aFields)
 	{
 		$this->_sTableName	= $sTable;
 		$this->_sPrimaryKey	= $sPrimary;

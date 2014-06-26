@@ -49,7 +49,7 @@ trait ExtendedLangFactoryTrait
 	 * (non-PHPdoc)
 	 * @see DataObject\Structure\ExtendedFactoryTrait::getBaseJoin()
 	 */
-	protected function getBaseJoin()
+	private function getBaseJoin()
 	{
 		if($this->_sJoinLang != $this->getLocale())
 		{
