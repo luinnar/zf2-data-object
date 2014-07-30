@@ -84,7 +84,7 @@ abstract class DataObject
 	 */
 	public function __wakeup()
 	{
-		$sFactory =	get_class() .'Factory';
+		$sFactory =	get_class($this) .'Factory';
 		$this->oFactory = new $sFactory;
 	}
 
