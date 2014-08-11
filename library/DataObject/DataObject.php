@@ -70,7 +70,7 @@ abstract class DataObject
 		// analizuję pola klasy i odrzucam pole bazy danych
 		foreach((new \ReflectionClass($this))->getProperties() as $oProperty)
 		{
-			if($oProperty->getName() != 'oFactory')
+			if($oProperty->getName() != 'oFactory' && !$oProperty->isStatic())
 			{
 				$aResult[] = $oProperty->getName();
 			}
