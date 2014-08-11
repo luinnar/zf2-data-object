@@ -80,12 +80,18 @@ abstract class DataObject
 	}
 
 	/**
-	 * Loads database object after usnserialize
+	 * Loads factory instance after unserialize
 	 */
 	public function __wakeup()
 	{
 		$sFactory =	get_class($this) .'Factory';
 		$this->oFactory = new $sFactory;
+
+		if(	$this instanceof Type\LanguageInterface &&
+			$this->oFactory instanceof Type\LanguageFactory)
+		{
+			$this->oFactory->setLocale($this->getLocale());
+		}
 	}
 
 // model manipulation methods
