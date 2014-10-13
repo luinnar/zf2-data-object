@@ -5,5 +5,10 @@
 	"require": {
 		"zendframework/zendframework": "2.3.*"
 	},
-	"version": "1.0"
+	"version": "1.0",
+	"autoload": {
+		"psr-4": {
+			"DataObject": "library/"
+		}
+	}
 }
