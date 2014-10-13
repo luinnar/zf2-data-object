@@ -1,0 +1,9 @@
+{
+	"name": "luinnar/zf2-data-object",
+	"description": "DataObject for ZF2",
+	"license": "MIT",
+	"require": {
+		"zendframework/zendframework": "2.3.*"
+	},
+	"version": "1.0"
+}
