@@ -24,6 +24,13 @@ abstract class Factory implements ServiceLocatorAwareInterface
 	use ServiceLocatorAwareTrait;
 
 	/**
+	 * Default option for count select query
+	 *
+	 * @var string
+	 */
+	const OPT_COUNT_SELECT = 'countSelect';
+
+	/**
 	 * Instance of db adapter
 	 *
 	 * @var Adapter
@@ -426,6 +433,13 @@ abstract class Factory implements ServiceLocatorAwareInterface
 	 */
 	protected function getCountSelect($mOption = null)
 	{
+		if(empty($mOption))
+		{
+			$mOption = [];
+		}
+
+		$mOption[] = self::OPT_COUNT_SELECT;
+
 		return $this->getSelect(['count' => new Expression('COUNT(*)')], $mOption);
 	}
 
