@@ -3,7 +3,7 @@
 	"description": "DataObject for ZF2",
 	"license": "MIT",
 	"require": {
-		"zendframework/zendframework": "~2.*"
+		"zendframework/zendframework": "2.*"
 	},
 	"version": "1.0",
 	"autoload": {
