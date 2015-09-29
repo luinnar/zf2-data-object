@@ -9,7 +9,7 @@
 	"autoload": {
 		"psr-0": {
 			"DataObject\\": "library/DataObject",
-			"MongoObject\\": "library/MongoObject",
+			"MongoObject\\": "library/MongoObject"
 		}
 	}
 }
