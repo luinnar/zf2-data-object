@@ -31,7 +31,7 @@ trait MultiKeyFactoryTrait
 			{
 				if(!isset($aPrimary[$sField]))
 				{
-					throw new Exception('No value for key part: ' . $sField);
+					throw new \Exception('No value for key part: ' . $sField);
 				}
 
 				$sFieldName = $this->getTableName() .'.'. $sField;
