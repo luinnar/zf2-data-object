@@ -38,6 +38,13 @@ class Adapter implements \Zend\Paginator\Adapter\AdapterInterface
 	protected $aSort;
 
 	/**
+	 * Opcje dodatkowe
+	 *
+	 * @var array
+	 */
+	protected $aOptions;
+
+	/**
 	 * Fabryka pobierajace dane
 	 *
 	 * @var \MongoCollection
@@ -55,19 +62,20 @@ class Adapter implements \Zend\Paginator\Adapter\AdapterInterface
 	 * Koństruktor
 	 *
 	 * @param	CUS_Mongo_Factory	$oFactory	fabryka pobierająca dane
-	 * @param	MongoCollection		$oColl		kolekcja mongo
+	 * @param	\MongoCollection	$oColl		kolekcja mongo
 	 * @param	array				$aQuery		zapytamnie mongowe
 	 * @param	array				$aFields	lista pól
 	 * @param	array				$aSort		sortowanie wyników
-	 * @return	CUS_Document_Paginator_Adapter
+	 * @param	array				$aOptions	opcje dodatkowe
 	 */
-	public function __construct($oFactory, \MongoCollection $oColl, array $aQuery, array $aFields, array $aSort)
+	public function __construct($oFactory, \MongoCollection $oColl, array $aQuery, array $aFields, array $aSort, array $aOptions = [])
 	{
 		$this->oFactory = $oFactory;
 		$this->oColl	= $oColl;
 		$this->aQuery	= $aQuery;
 		$this->aFields	= $aFields;
 		$this->aSort	= $aSort;
+		$this->aOptions	= $aOptions;
 	}
 
 	/**
@@ -94,7 +102,7 @@ class Adapter implements \Zend\Paginator\Adapter\AdapterInterface
 		$iPage = floor($iOffset / $iItemPerPage) + 1;
 
 		return $this->oFactory->getPage(
-					$iPage, $iItemPerPage, $this->aQuery, $this->aFields, $this->aSort
+					$iPage, $iItemPerPage, $this->aQuery, $this->aFields, $this->aSort, $this->aOptions
 				);
 	}
 }

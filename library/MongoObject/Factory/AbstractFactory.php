@@ -44,9 +44,10 @@ abstract class AbstractFactory
 	 *
 	 * @param	array		$aQuery		array with query conditions
 	 * @param	array|null	$aFields	required fields
+	 * @param	array		$aOptions	additional options
 	 * @return	\MongoCursor
 	 */
-	public function find(array $aQuery = [], array $aFields = null)
+	public function find(array $aQuery = [], array $aFields = null, array $aOptions = [])
 	{
 		// wybieram zestaw pól
 		$aFields = $this->getDocumentFields($aFields);
@@ -65,10 +66,11 @@ abstract class AbstractFactory
 	 *
 	 * @param	array		$aFind		array with query conditions
 	 * @param	array|null	$aFields	required fields
-	 * @throws	CUS_Mongo_Factory_Exception
-	 * @return	CUS_Mongo_Document
+	 * @param	array		$aOptions	additional options
+	 * @throws	Exception
+	 * @return	Document
 	 */
-	public function findOne(array $aFind, array $aFields = null)
+	public function findOne(array $aFind, array $aFields = null, array $aOptions = [])
 	{
 		// wybieram zestaw pól
 		$aFields = $this->getDocumentFields($aFields);
@@ -88,7 +90,7 @@ abstract class AbstractFactory
 			throw new Exception('Nie znaleziono poszukiwanego dokumentu');
 		}
 
-		return $this->createObject($aRes);
+		return $this->createObject($aRes, $aOptions);
 	}
 
 	/**
@@ -99,10 +101,11 @@ abstract class AbstractFactory
 	 * @param	array	$aSort		sorting
 	 * @param	int		$iPage		results page number
 	 * @param	int		$iPageCount	results per page
+	 * @param	array	$aOptions	additional options
 	 * @return	array
 	 */
 	public function getByApiRequest(array $aParams, array $aFilters = [], array $aSort = [],
-									$iPage = 1, $iPageCount = 100)
+									$iPage = 1, $iPageCount = 100, array $aOptions = [])
 	{
 		// converting ID string to MongoID instance
 		if(isset($aFilters['_id']) && is_string($aFilters['_id']))
@@ -124,7 +127,7 @@ abstract class AbstractFactory
 		}
 
 		// query execution
-		$oRequest = $this->find($aFilters, $aParams);
+		$oRequest = $this->find($aFilters, $aParams, $aOptions);
 		$oRequest->skip(($iPage - 1) * $iPageCount)->limit($iPageCount);
 
 		// sorting
@@ -154,13 +157,14 @@ abstract class AbstractFactory
 	/**
 	 * Returns single document matching document's ID
 	 *
-	 * @param	string					$sId	document's ID
+	 * @param	string		$sId		document's ID
+	 * @param	array		$aOptions	additional options
 	 * @throws	MongoObject\Exception
 	 * @return	MongoObject\Document
 	 */
-	public function getOne($sId)
+	public function getOne($sId, $aOptions)
 	{
-		return $this->findOne(['_id' => new \MongoId($sId)]);
+		return $this->findOne(['_id' => new \MongoId($sId)], null, $aOptions);
 	}
 
 	/**
@@ -171,11 +175,12 @@ abstract class AbstractFactory
 	 * @param	array	$aQuery		query conditions as array
 	 * @param 	array	$aFields	required fields
 	 * @param	array	$aSort		sorting condisions
+	 * @param	array	$aOptions	additional options
 	 * @return	MongoCursor
 	 */
-	public function getPage($iPage, $iCount, array $aQuery = [], array $aFields = null, array $aSort = [])
+	public function getPage($iPage, $iCount, array $aQuery = [], array $aFields = null, array $aSort = [], array $aOptions = [])
 	{
-		$oCursor = $this->find($aQuery, $this->getDocumentFields($aFields))
+		$oCursor = $this->find($aQuery, $this->getDocumentFields($aFields), $aOptions)
 						->skip(($iPage - 1) * $iCount)
 						->limit($iCount);
 
@@ -184,7 +189,7 @@ abstract class AbstractFactory
 			$oCursor->sort($aSort);
 		}
 
-		return $this->createList($oCursor);
+		return $this->createList($oCursor, $aOptions);
 	}
 
 	/**
@@ -195,16 +200,18 @@ abstract class AbstractFactory
 	 * @param	array	$aQuery		query conditions as array
 	 * @param 	array	$aFields	required fields
 	 * @param	array	$aSort		sorting condisions
+	 * @param	array	$aOptions	additional options
 	 * @return	\Zend\Paginator\Paginator
 	 */
-	public function getPaginator($iPage, $iCount, array $aQuery = [], array $aFields = null, array $aSort = [])
+	public function getPaginator($iPage, $iCount, array $aQuery = [], array $aFields = null, array $aSort = [], array $aOptions = [])
 	{
 		$oAdapter = new \MongoObject\Paginator\Adapter(
 							$this,
 							$this->getCollection(),
 							$aQuery,
 							$this->getDocumentFields($aFields),
-							$aSort
+							$aSort,
+							$aOptions
 						);
 
 		return (new \Zend\Paginator\Paginator($oAdapter))
@@ -218,15 +225,16 @@ abstract class AbstractFactory
 	 * Returns array with Document instances
 	 *
 	 * @param	\MongoCursor	$oDbResult	cursor returned by database
+	 * @param	array	$aOptions	additional options
 	 * @return	array
 	 */
-	protected function createList(\MongoCursor $oDbResult)
+	protected function createList(\MongoCursor $oDbResult, array $aOptions = [])
 	{
 		$aResult = [];
 
 		foreach($oDbResult as $aDoc)
 		{
-			$aResult[] = $this->createObject($aDoc);
+			$aResult[] = $this->createObject($aDoc, $aOptions);
 		}
 
 		return $aResult;
@@ -235,10 +243,11 @@ abstract class AbstractFactory
 	/**
 	 * Creates Document class instances
 	 *
-	 * @param	array	$aData	document contents
+	 * @param	array	$aData		document contents
+	 * @param	array	$aOptions	additional options
 	 * @return	\MongoObject\Document\Document
 	 */
-	protected function createObject(array &$aData)
+	protected function createObject(array &$aData, array $aOptions = [])
 	{
 		return new Document($aData, $this->getCollection());
 	}
