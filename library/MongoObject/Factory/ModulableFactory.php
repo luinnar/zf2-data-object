@@ -140,7 +140,7 @@ abstract class ModulableFactory extends AbstractFactory
 	 * (non-PHPdoc)
 	 * @see \MongoObject\Factory\AbstractFactory::createObject()
 	 */
-	protected function createObject(array &$aData)
+	protected function createObject(array &$aData, array $aOptions = [])
 	{
 		return new Document($aData, $this->getCollection(), $this->aModulesCurrent);
 	}
