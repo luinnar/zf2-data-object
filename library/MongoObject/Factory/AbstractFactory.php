@@ -162,7 +162,7 @@ abstract class AbstractFactory
 	 * @throws	MongoObject\Exception
 	 * @return	MongoObject\Document
 	 */
-	public function getOne($sId, $aOptions)
+	public function getOne($sId, array $aOptions = [])
 	{
 		return $this->findOne(['_id' => new \MongoId($sId)], null, $aOptions);
 	}
