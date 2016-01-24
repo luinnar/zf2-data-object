@@ -1,5 +1,5 @@
 {
-	"name": "pt-pl/zf2-data-object",
+	"name": "luinnar/zf2-data-object",
 	"description": "DataObject for ZF2",
 	"license": "MIT",
 	"require": {
