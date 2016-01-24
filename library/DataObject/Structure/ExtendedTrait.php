@@ -28,5 +28,7 @@ trait ExtendedTrait
 			$this->aData['_'. $sTable][$sField] = $mValue;
 			$this->aModifiedFields['_'. $sTable][$sField] = $mValue;
 		}
+
+		return $this;
 	}
 }
